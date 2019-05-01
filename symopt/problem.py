@@ -1,9 +1,4 @@
 from itertools import starmap
-
-import ipdb
-
-ipdb
-
 import numpy as np
 import sympy as sym
 from orderedset import OrderedSet
