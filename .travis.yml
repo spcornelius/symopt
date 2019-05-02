@@ -29,7 +29,11 @@ before_install:
   - conda create -n myenv python=$PYTHON anaconda;
   - source activate myenv;
   - conda install -c conda-forge cyipopt;
-install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+     conda install clang_osx-64 clangxx_osx-64 gfortran_osx-64
+    elif [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+     conda install gcc_linux-64 gxx_linux-64 gfortran_linux-64
+    fi
   - python -m pip install .[all]
 script:
   - PYTHONPATH=$(pwd) python -m pytest --pep8 --ignore setup.py --ignore build/
