@@ -13,7 +13,9 @@ Optimization problems can be defined using the `OptimizationProblem`
 class, which has a similar constructor to `scipy.optimize.minimize`.
 For example, consider
 
-- <img align="center" src="https://latex.codecogs.com/gif.latex?\begin{align*}&space;\textrm{minimize}\;\;&space;&x_1^2/100&space;&plus;&space;x_2^2&space;\\&space;\textrm{subject&space;to}\;\;&space;&&space;x_1&space;x_2&space;\geq&space;25&space;\\&space;&&space;x_1^2&space;&plus;&space;x_2^2&space;\geq&space;25&space;\\&space;&&space;2&space;\leq&space;x_1&space;\leq&space;p_1&space;\\&space;&&space;0&space;\leq&space;x_2&space;\leq&space;p_2&space;\\&space;\end{align*}">
+<p align="center>
+    <img src="https://latex.codecogs.com/gif.latex?\begin{align*}&space;\textrm{minimize}\;\;&space;&x_1^2/100&space;&plus;&space;x_2^2&space;\\&space;\textrm{subject&space;to}\;\;&space;&&space;x_1&space;x_2&space;\geq&space;25&space;\\&space;&&space;x_1^2&space;&plus;&space;x_2^2&space;\geq&space;25&space;\\&space;&&space;2&space;\leq&space;x_1&space;\leq&space;p_1&space;\\&space;&&space;0&space;\leq&space;x_2&space;\leq&space;p_2&space;\\&space;\end{align*}">
+</p>
 
 where the *p*'s  are parameters defining the upper bounds for each variable. This can be defined
 by:
