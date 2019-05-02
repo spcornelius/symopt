@@ -6,6 +6,7 @@ from symopt.problem import OptimizationProblem
 
 tol = 1.0e-8
 
+
 @pytest.mark.parametrize("method", ["cyipopt", "cobyla", "slsqp"])
 def test_prob18(method):
     # problem 18 from Hock-Schittkowski test suite
