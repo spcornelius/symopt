@@ -28,11 +28,11 @@ before_install:
   - conda update -q conda;
   - conda create -n myenv python=$PYTHON anaconda;
   - source activate myenv;
-  - conda install -c conda-forge cyipopt;
+  - conda install -y -c conda-forge cyipopt;
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-     conda install clang_osx-64 clangxx_osx-64 gfortran_osx-64
+     conda install -y clang_osx-64 clangxx_osx-64 gfortran_osx-64;
     elif [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-     conda install gcc_linux-64 gxx_linux-64 gfortran_linux-64
+     conda install -y gcc_linux-64 gxx_linux-64 gfortran_linux-64;
     fi
   - python -m pip install .[all]
 script:
