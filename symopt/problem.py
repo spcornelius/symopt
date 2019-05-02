@@ -1,5 +1,8 @@
 from itertools import starmap
+
+import ipopt as cyipopt
 import numpy as np
+import scipy.optimize as scipy_opt
 import sympy as sym
 from orderedset import OrderedSet
 from sympy import sympify, Symbol, Matrix, MatrixSymbol, SympifyError, \
@@ -10,9 +13,6 @@ from sympy.utilities.autowrap import autowrap
 
 from symopt.util import constituent_scalars, squeezed, flatten_and_concat
 
-import scipy.optimize as scipy_opt
-import ipopt as cyipopt
-
 __all__ = []
 __all__.extend([
     'OptimizationProblem'
@@ -22,7 +22,11 @@ __all__.extend([
 class OptimizationProblem(object):
 
     def __init__(self, obj, vars, lb=None, ub=None,
-                 constraints=None, params=None):
+                 constraints=None, params=None, mode="min"):
+        self.mode = str(mode).lower()
+        if mode not in ["min", "max"]:
+            raise ValueError(
+                "Optimization mode must be one of ['min', 'max'].")
         self._process_vars(vars)
         self._process_params(params)
         self._process_objective(obj)
@@ -87,6 +91,8 @@ class OptimizationProblem(object):
             raise ValueError(
                 "Objective function can depend only on declared vars and "
                 "params.")
+        if self.mode == "max":
+            obj = -obj
         self.obj = obj
         self.obj_cb = self.autowrap(self.obj)
         self.obj_grad = self._grad(self.obj)
