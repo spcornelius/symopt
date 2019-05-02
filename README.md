@@ -62,3 +62,8 @@ Optional dependencies
 License
 -------
 `symopt` is released under the MIT license. See LICENSE for details.
+
+
+Author
+------
+Sean P. Cornelius (gmail address: spcornelius).
