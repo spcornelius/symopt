@@ -17,14 +17,9 @@ Optimization problems can be defined using the `OptimizationProblem`
 class, which has a similar constructor to `scipy.optimize.minimize`.
 For example, consider
 
-.. math::
-    \text{minimize}\; &x_1^2/100 + x_2^2 \\
-    \text{s.t.}\; &x_1 x_2 \geq 25 \\
-                  &x_1^2 + x_2^2 \geq 25 \\
-                  &2 \leq x_1 \leq p_1 \\
-                  &0 \leq x_2 \leq p_2 \\
+.. image:: https://latex.codecogs.com/gif.latex?\begin{align*}&space;\textrm{minimize}\;\;&space;&x_1^2/100&space;&plus;&space;x_2^2&space;\\&space;\textrm{subject&space;to}\;\;&space;&&space;x_1&space;x_2&space;\geq&space;25&space;\\&space;&&space;x_1^2&space;&plus;&space;x_2^2&space;\geq&space;25&space;\\&space;&&space;2&space;\leq&space;x_1&space;\leq&space;p_1&space;\\&space;&&space;0&space;\leq&space;x_2&space;\leq&space;p_2&space;\\&space;\end{align*}
 
-where :math:`p_1` and :math:`p_2` are parameters defining
+where the *p*'s  are parameters defining
 the upper bounds for each variable. This can be defined
 by:
 
