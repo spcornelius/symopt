@@ -1,14 +1,10 @@
-======
 symopt
 ======
 
 Easy (non)linear optimization with symbolically-defined
 objectives/constraints, with automatic calculation of derivatives.
-Uses SciPy_ and Ipopt_ (through cyipopt_) as optimization backends.
-
-.. _Ipopt: https://projects.coin-or.org/Ipopt
-.. _SciPy: https://www.scipy.org/
-.. _cyipopt: https://github.com/matthias-k/cyipopt
+Uses [SciPy](https://www.scipy.org/) and [Ipopt](https://projects.coin-or.org/Ipopt) 
+(through [cyipopt](https://github.com/matthias-k/cyipopt)) as optimization backends.
 
 Usage
 -----
@@ -17,14 +13,10 @@ Optimization problems can be defined using the `OptimizationProblem`
 class, which has a similar constructor to `scipy.optimize.minimize`.
 For example, consider
 
-.. image:: https://latex.codecogs.com/gif.latex?\begin{align*}&space;\textrm{minimize}\;\;&space;&x_1^2/100&space;&plus;&space;x_2^2&space;\\&space;\textrm{subject&space;to}\;\;&space;&&space;x_1&space;x_2&space;\geq&space;25&space;\\&space;&&space;x_1^2&space;&plus;&space;x_2^2&space;\geq&space;25&space;\\&space;&&space;2&space;\leq&space;x_1&space;\leq&space;p_1&space;\\&space;&&space;0&space;\leq&space;x_2&space;\leq&space;p_2&space;\\&space;\end{align*}
-    :align: center
+- <img align="center" src="https://latex.codecogs.com/gif.latex?\begin{align*}&space;\textrm{minimize}\;\;&space;&x_1^2/100&space;&plus;&space;x_2^2&space;\\&space;\textrm{subject&space;to}\;\;&space;&&space;x_1&space;x_2&space;\geq&space;25&space;\\&space;&&space;x_1^2&space;&plus;&space;x_2^2&space;\geq&space;25&space;\\&space;&&space;2&space;\leq&space;x_1&space;\leq&space;p_1&space;\\&space;&&space;0&space;\leq&space;x_2&space;\leq&space;p_2&space;\\&space;\end{align*}">
 
-where the *p*'s  are parameters defining
-the upper bounds for each variable. This can be defined
+where the *p*'s  are parameters defining the upper bounds for each variable. This can be defined
 by:
-
-.. code:: python
 
     from symopt import OptimizationProblem
     from sympy import MatrixSymbol, symbols
@@ -45,8 +37,6 @@ That's it. From here, `symopt` will automatically create the corresponding funct
 numerically evaluate the objective, constraints, and upper/lower bounds, as well
 as those of the relevant derivatives (e.g. objective and constraint gradients). One can then solve the problem for specified parameters using `solve`:
 
-.. code:: python
-
     x0 = [2, 2]
     p = [20.0, 50.0]
     res = prob.solve(x0, p, method='cyipopt')
@@ -60,17 +50,13 @@ Dependencies
 * numpy
 * scipy
 * sympy
-* orderedset_
-
-.. _orderedset: https://pypi.org/project/orderedset/
+* [orderedset](https://pypi.org/project/orderedset/)
 
 Optional dependencies
 ---------------------
-* cyipopt_ (for optimizatoin using the IPOPT backend)
+* [cyipopt](https://github.com/matthias-k/cyipopt) (for optimizationn using the IPOPT backend)
 
-
-.. _cyipopt: https://github.com/matthias-k/cyipopt
 
 License
 -------
-``symopt`` is released under the MIT license. See LICENSE for details.
+`symopt` is released under the MIT license. See LICENSE for details.
