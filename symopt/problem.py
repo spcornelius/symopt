@@ -20,9 +20,59 @@ __all__.extend([
 
 
 class OptimizationProblem(object):
+    """ Optimization problem with symbolic objective function, constraints,
+        and/or parameters.
+
+        The associated evaluation functions are created automatically,
+        including those of the relevant derivatives (objective function
+        gradient, constraint gradients, etc.), which are automatically
+        derived from the symbolic expressions.
+
+        Attributes
+        ----------
+        obj : Expr
+            The objective function to optimize.
+        vars : OrderedSet with Symbol or MatrixSymbol elements
+            The free variables.
+        params : OrderedSet with Symbol or MatrixSymbol elements
+            The parameters of the objective function and/or constraints.
+        cons : list with SymPy GreatherThan or Equality elements
+            The constraints, converted to the form expr >= 0 or expr == 0.
+        lb : list of Exprs
+            The lower bounds, one for each scalar in `vars'. If
+            symbolic, should depend only on `params`.
+        ub : list of Exprs
+            The upper bounds, one for each scalar in `vars'. If
+            symbolic, should depend only on `params`.
+        mode : str, one of 'max' or 'min'
+            Whether the problem is a minimization or maximization problem.
+        """
 
     def __init__(self, obj, vars, lb=None, ub=None,
                  constraints=None, params=None, mode="min"):
+        """ Optimization problem with symbolic objective function, constraints,
+            and/or parameters.
+
+            Attributes
+            ----------
+            obj : Expr
+                The objective function to optimize. Can depend on `vars` and
+                also `params`.
+            vars : Iterable of Symbols and/or MatrixSymbols
+                The free variables.
+            params : Iterable of Symbols and/or MatrixSymbols
+                The parameters of the objective function and/or constraints.
+            cons : Iterable of SymPy Relationals
+                The constraints. Can depend on both `vars` and `params`.
+            lb : Iterable of Reals and/or Exprs
+                The lower bounds, one for each scalar in `vars'. If
+                symbolic, should depend only on `params`.
+            ub : Iterable of Reals and/or Exprs
+                The upper bounds, one for each scalar in `vars'. If
+                symbolic, should depend only on `params`.
+            mode : str, one of 'max' or 'min'
+                Whether the problem is a minimization or maximization problem.
+        """
         self.mode = str(mode).lower()
         if mode not in ["min", "max"]:
             raise ValueError(
@@ -148,12 +198,12 @@ class OptimizationProblem(object):
             lb = [sympify(expr) for expr in lb]
             ub = [sympify(expr) for expr in ub]
         except (AttributeError, TypeError, SympifyError):
-            raise TypeError("Could not convert bounds to lists of Reals and/or"
+            raise TypeError("Could not convert bounds to a lists of "
                             "sympy expressions.")
         if len(lb) != n or len(ub) != n:
             raise ValueError(
-                f"lb and ub must have the same length ({n}) as number of "
-                f"scalar variables")
+                f"Bounds must have the same length ({n}) as number of "
+                f"scalar variables.")
         for expr in lb:
             if not self.depends_only_on_params_or_vars(expr):
                 raise ValueError(
@@ -162,8 +212,8 @@ class OptimizationProblem(object):
             if not self.depends_only_on_params_or_vars(expr):
                 raise ValueError(
                     f"Upper bound {expr} may only depend on declared params.")
-        self.lb = Matrix(lb)
-        self.ub = Matrix(ub)
+        self.lb = lb
+        self.ub = ub
 
     def fill_in_params(self, expr, *param_vals):
         subs = {p: Matrix(v) if isinstance(p, MatrixSymbol) else v for
@@ -172,13 +222,33 @@ class OptimizationProblem(object):
 
     @squeezed
     def eval_ub(self, *param_vals):
-        return np.asarray(self.fill_in_params(self.ub, *param_vals).evalf())
+        return np.asarray(
+            self.fill_in_params(Matrix(self.ub), *param_vals).evalf())
 
     @squeezed
     def eval_lb(self, *param_vals):
-        return np.asarray(self.fill_in_params(self.lb, *param_vals).evalf())
+        return np.asarray(
+            self.fill_in_params(Matrix(self.lb), *param_vals).evalf())
 
     def solve(self, x0, *args, method='cyipopt', **kwargs):
+        """ Solve the OptimizationFunction for a particular parameter values.
+
+        Parameters
+        ----------
+        x0 : ndarray
+            The initial condition to use for the optimizer.
+        *args
+            The parameter values to use, defined in the same order (and
+            with the same shapes as in `params`). Should be Real scalars
+            or Matrix objects with numerical (not symbolic) entries.
+        method : str
+            Which optimization backend to use. Currently supported are
+            one of 'cyipopt', 'slsqp' (from scipy.optimize), and
+             'cobyla' (from scipy.optimize).
+        **kwargs
+            Keyword arguments to pass to the optimization backend. See the
+            corresponding docs for available options.
+        """
         fun, jac, bounds, constraints = self._prepare(*args)
         method = method.lower()
         if method == 'cyipopt':
