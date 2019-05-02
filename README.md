@@ -19,7 +19,7 @@ For example, consider
 
 where the *p*'s  are parameters defining the upper bounds for each variable. This can be defined
 by:
-
+```python
     from symopt import OptimizationProblem
     from sympy import MatrixSymbol, symbols
 
@@ -34,15 +34,15 @@ by:
 
     prob = OptimizationProblem(obj, [x], params=[p], constraints=con,
                                lb=lb, ub=ub, mode='min')
-
+```
 That's it. From here, `symopt` will automatically create the corresponding functions to
 numerically evaluate the objective, constraints, and upper/lower bounds, as well
 as those of the relevant derivatives (e.g. objective and constraint gradients). One can then solve the problem for specified parameters using `solve`:
-
+```python
     x0 = [2, 2]
     p = [20.0, 50.0]
     res = prob.solve(x0, p, method='cyipopt')
-
+```
 Note that the objective function, constraints, and upper/lower
 bounds can depend on the declared parameters. Variables and parameters
 may be a mixture of `Symbol` and `MatrixSymbol` objects.
