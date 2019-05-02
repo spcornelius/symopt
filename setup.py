@@ -24,7 +24,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Mathematics",
 ]
 
-with open("README.rst", "r") as f:
+with open("README.md", "r") as f:
     long_description = f.read()
 
 if __name__ == '__main__':
