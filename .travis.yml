@@ -9,7 +9,7 @@ matrix:
     - os: linux
       dist: xenial
       language: python
-      env: PYTHON="3.7"
+      env: PYTHON="3.6"
     - os: linux
       dist: xenial
       language: python
@@ -28,6 +28,9 @@ before_install:
   - conda update -q conda;
   - conda create -n myenv python=$PYTHON anaconda;
   - source activate myenv;
+  - export LIBRARY_PATH="$CONDA_PREFIX/lib:$LIBRARY_PATH";
+  - export CPATH="$CONDA_PREFIX/include:$CPATH";
+  - export PATH="$CONDA_PREFIX/bin:$PATH";
   - conda install -y -c conda-forge cyipopt;
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
      conda install -y clang_osx-64 clangxx_osx-64 gfortran_osx-64;
