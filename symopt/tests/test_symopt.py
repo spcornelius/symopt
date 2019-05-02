@@ -42,13 +42,21 @@ def test_prob71(method):
     lb = np.ones(4)
     ub = 5 * np.ones(4)
 
-    prob = OptimizationProblem(obj, [x], constraints=con, lb=lb, ub=ub)
+    prob_min = OptimizationProblem(obj, [x], constraints=con, lb=lb, ub=ub)
     x0 = np.array([1, 5, 5, 1])
-    res = prob.solve(x0, method=method, tol=tol)
+    res_min = prob_min.solve(x0, method=method, tol=tol)
 
-    assert res['success']
-    assert np.allclose(res['x'],
+    assert res_min['success']
+    assert np.allclose(res_min['x'],
                        np.array([1.0, 4.74299964, 3.82114998, 1.37940831]))
+
+    # test maximization
+    prob_max = OptimizationProblem(-obj, [x], constraints=con,
+                                   lb=lb, ub=ub, mode="max")
+    res_max = prob_max.solve(x0, method=method, tol=tol)
+    assert res_max['success']
+    assert np.allclose(res_max['x'], res_min['x'])
+    assert np.allclose(res_max['fun'], res_min['fun'])
 
 
 @pytest.mark.parametrize("method", ["cyipopt", "cobyla", "slsqp"])
