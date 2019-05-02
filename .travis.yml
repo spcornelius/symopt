@@ -1,11 +1,11 @@
 matrix:
   include:
-    - os: osx
-      langauge: sh
-      env: PYTHON="3.6"
-    - os: osx
-      langauge: sh
-      env: PYTHON="3.7"
+#    - os: osx
+#      langauge: sh
+#      env: PYTHON="3.6"
+#    - os: osx
+#      langauge: sh
+#      env: PYTHON="3.7"
     - os: linux
       dist: xenial
       language: python
@@ -28,14 +28,9 @@ before_install:
   - conda update -q conda;
   - conda create -n myenv python=$PYTHON anaconda;
   - CONDA_BUILD=1 source activate myenv;
-  - export LIBRARY_PATH="$CONDA_PREFIX/lib:$LIBRARY_PATH";
-  - export CPATH="$CONDA_PREFIX/include:$CPATH";
-  - export PATH="$CONDA_PREFIX/bin:$PATH";
-  - conda install -y -c conda-forge cyipopt pip;
+  - conda install -c conda-forge cyipopt pip;
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-     conda install -y clang_osx-64 clangxx_osx-64 gfortran_osx-64;
-    elif [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-     conda install -y gcc_linux-64 gxx_linux-64 gfortran_linux-64;
+     conda gfortran_osx-64;
     fi
   - python -m pip install .[all]
 script:
