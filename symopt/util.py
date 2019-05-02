@@ -11,6 +11,8 @@ __all__.extend([
 
 
 def squeezed(method):
+    """ return x.squeeze() from a function that returns a numpy
+        array x """
     def wrapped(*args, **kwargs):
         return method(*args, **kwargs).squeeze()
 
@@ -18,11 +20,12 @@ def squeezed(method):
 
 
 def flatten_and_concat(*args):
+    """ concatenate a list of nested lists into a flat list """
     return chain.from_iterable(sym.flatten(arg) for arg in args)
 
 
 def constituent_scalars(s):
-    # convert symbolic var to a list of its component scalar symbols
+    """" convert symbolic var s to a list of its component scalar symbols """
     if isinstance(s, MatrixSymbol):
         return s.as_explicit()
     else:
