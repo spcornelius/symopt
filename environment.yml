@@ -8,11 +8,12 @@ dependencies:
   - numpy
   - numpydoc
   - orderedset
-  - pip==9.0.3
+  - pip == 9.0.3
   - pytest
   - pytest-pep8
   - python >= 3.6
   - scipy
-  - sphinx
-  - sphinx_rtd_theme
+  # newer versions of the next two produce ugly output for numpydoc
+  - sphinx <= 1.8.4
+  - sphinx_rtd_theme == 0.2.4
   - sympy
