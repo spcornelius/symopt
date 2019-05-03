@@ -21,6 +21,12 @@ project = 'symopt'
 copyright = '2019, Sean P. Cornelius <spcornelius@gmail.com>'
 author = 'Sean P. Cornelius <spcornelius@gmail.com>'
 
+# The short X.Y version
+version = '0.1.0'
+
+# The full version, including alpha/beta/rc tags
+release = '0.1.0'
+
 
 # -- General configuration ---------------------------------------------------
 
