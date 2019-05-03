@@ -26,11 +26,13 @@ before_install:
   - hash -r;
   - conda config --set always_yes yes --set changeps1 no;
   - conda update -q conda;
+  - source $HOME/miniconda/etc/profile.d/conda.sh
+install:
   - conda create -n symopt python=$PYTHON anaconda;
   - conda activate symopt;
   - conda install -c conda-forge cyipopt;
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-     conda gfortran_osx-64;
+     conda install gfortran_osx-64;
     fi
   - python -m pip install .[all]
 script:
