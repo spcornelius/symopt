@@ -11,10 +11,12 @@ sphinx-apidoc --full --force -A "$AUTHOR" --module-first --doc-version=$(python 
 cat <<EOF >>docs/index.rst
 Overview
 ========
-source/README.md
+
+.. mdinclude:: README.md
+
 EOF
 MATCH="'sphinx.ext.viewcode'"
-NEW="'sphinx.ext.viewcode', 'sphinx.ext.autosummary', 'numpydoc', 'recommonmark'"
+NEW="'sphinx.ext.viewcode', 'sphinx.ext.autosummary', 'numpydoc', 'm2r'"
 sed -i "" "s/$MATCH/$NEW/g" docs/conf.py
 sed -i "" "s/alabaster/sphinx_rtd_theme/g" docs/conf.py
 

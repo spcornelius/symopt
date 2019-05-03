@@ -35,7 +35,7 @@ release = '0.1.0'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.viewcode', 'sphinx.ext.autosummary', 'numpydoc', 'recommonmark',
+    'sphinx.ext.viewcode', 'sphinx.ext.autosummary', 'numpydoc', 'm2r',
     'sphinx.ext.todo',
 ]
 
