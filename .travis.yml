@@ -32,6 +32,8 @@ install:
   - conda install -c conda-forge cyipopt;
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
      conda install gfortran_osx-64;
+    elif [ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      apt-get install gfortran;
     fi
   - python -m pip install .[all]
 script:
