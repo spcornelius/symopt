@@ -7,3 +7,6 @@ environment.yml
 **/__pycache__
 .*cache/
 *.egg-info/
+docs/_build/
+docs/_static/
+docs/_templates/
