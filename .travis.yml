@@ -1,11 +1,11 @@
 matrix:
   include:
-#    - os: osx
-#      langauge: sh
-#      env: PYTHON="3.6"
-#    - os: osx
-#      langauge: sh
-#      env: PYTHON="3.7"
+    - os: osx
+      langauge: sh
+      env: PYTHON="3.6"
+    - os: osx
+      langauge: sh
+      env: PYTHON="3.7"
     - os: linux
       dist: xenial
       language: python
