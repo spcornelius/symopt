@@ -9,9 +9,9 @@ conda:
 
 python:
   version: 3.6
-  install: true
+  install:
     - method: pip
       path: .
       extra_requirements:
         - testing
-          - docs
+        - docs
