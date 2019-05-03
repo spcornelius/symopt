@@ -1,7 +1,6 @@
 .idea/
 .envrc
 .bumpversion.cfg
-environment.yml
 **/.ipynb_checkpoints/
 **/*.pyc
 **/__pycache__
