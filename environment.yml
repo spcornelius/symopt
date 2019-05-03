@@ -3,16 +3,14 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - cython
   - cyipopt
-  - numpy
   - numpydoc
   - orderedset
   - pip
   - pytest
   - pytest-pep8
   - python >= 3.6
-  - scipy
-  - sympy
   - sphinx
   - sphinx_rtd_theme
 
