@@ -1,0 +1,43 @@
+{% set name = "symopt" %}
+{% set version = "0.1.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  git_url: ../
+
+build:
+  noarch: python
+  number: 0
+  script: python -m pip install --no-deps --ignore-installed .
+
+requirements:
+  build:
+    - python>=3.6
+    - setuptools
+    - pip
+  run:
+    - python>=3.6
+    - numpy
+    - sympy
+    - scipy
+    - cyipopt
+    - orderedset
+
+test:
+  imports:
+    - {{ name }}
+  requires:
+    - pytest
+
+about:
+  home: https://github.com/spcornelius/{{ name }}
+  license: MIT
+  license_file: LICENSE
+  summary: '(Non)linear optimization with symbolically-defined objectives/constraints'
+
+extra:
+  recipe-maintainers:
+    - spcornelius
