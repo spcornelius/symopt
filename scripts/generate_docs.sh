@@ -18,7 +18,7 @@ EOF
 MATCH="'sphinx.ext.viewcode'"
 NEW="'sphinx.ext.viewcode', 'sphinx.ext.autosummary', 'numpydoc', 'm2r'"
 sed -i "" "s/$MATCH/$NEW/g" docs/conf.py
-sed -i "" "s/alabaster/sphinx_rtd_theme/g" docs/conf.py
+#sed -i "" "s/alabaster/sphinx_rtd_theme/g" docs/conf.py
 
 echo "numpydoc_class_members_toctree = False" >>docs/conf.py
 ABS_REPO_PATH=$(unset CDPATH && cd "$(dirname "$0")/.." && echo $PWD)

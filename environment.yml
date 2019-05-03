@@ -5,12 +5,15 @@ channels:
 dependencies:
   - cython
   - cyipopt
+  - numpy
   - numpydoc
   - orderedset
-  - pip==9.0.3
+  - pip
   - pytest
   - pytest-pep8
   - python >= 3.6
+  - scipy
   - sphinx
   - sphinx_rtd_theme
+  - sympy
 
