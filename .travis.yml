@@ -22,13 +22,13 @@ before_install:
       wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
     fi
   - bash miniconda.sh -b -p $HOME/miniconda;
-  - export PATH="$HOME/miniconda/bin:$PATH";
+#  - export PATH="$HOME/miniconda/bin:$PATH";
   - hash -r;
   - conda config --set always_yes yes --set changeps1 no;
   - conda update -q conda;
-  - conda create -n myenv python=$PYTHON anaconda;
-  - CONDA_BUILD=1 source activate myenv;
-  - conda install -c conda-forge cyipopt pip;
+  - conda create -n symopt python=$PYTHON anaconda;
+  - conda activate symopt;
+  - conda install -c conda-forge cyipopt;
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
      conda gfortran_osx-64;
     fi
