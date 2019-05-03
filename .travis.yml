@@ -29,12 +29,12 @@ before_install:
 install:
   - conda create -n symopt python=$PYTHON anaconda;
   - conda activate symopt;
-  - conda install -c conda-forge cyipopt;
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       conda install gfortran_osx-64;
     elif [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      apt-get install gfortran;
+      sudo apt-get install gfortran;
     fi
+  - conda install -c conda-forge cyipopt;
   - python -m pip install .[all]
 script:
   - PYTHONPATH=$(pwd) python -m pytest --pep8 --ignore setup.py --ignore build/
