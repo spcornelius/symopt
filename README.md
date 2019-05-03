@@ -53,7 +53,7 @@ Dependencies
 * scipy
 * sympy
 * [orderedset](https://pypi.org/project/orderedset/)
-* [cyipopt](https://github.com/matthias-k/cyipopt) (for optimizationn using the IPOPT backend)
+* [cyipopt](https://github.com/matthias-k/cyipopt)
 
 
 License
