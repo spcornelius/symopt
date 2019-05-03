@@ -53,7 +53,7 @@ class OptimizationProblem(object):
         """ Optimization problem with symbolic objective function, constraints,
             and/or parameters.
 
-            Attributes
+            Parameters
             ----------
             obj : Expr
                 The objective function to optimize. Can depend on `vars` and
@@ -85,14 +85,15 @@ class OptimizationProblem(object):
 
     @property
     def free_symbols(self):
+        """ OrderedSet: All symbols (vars + params) present in the problem."""
         # Note: having params first is important for use of partial below
         return self.vars | self.params
 
-    def depends_only_on_params(self, expr):
+    def _depends_only_on_params(self, expr):
         # test whether expression's free symbols are only in params
         return sympify(expr).free_symbols <= self.params
 
-    def depends_only_on_params_or_vars(self, expr):
+    def _depends_only_on_params_or_vars(self, expr):
         # test whether expression's free symbols are only in params or vars
         return sympify(expr).free_symbols <= self.free_symbols
 
@@ -112,7 +113,7 @@ class OptimizationProblem(object):
             flatten_and_concat(*map(constituent_scalars, vars)))
         self._dummy = MatrixSymbol('dummy', len(self._scalar_vars), 1)
 
-    def autowrap(self, expr):
+    def _autowrap(self, expr):
         subs = dict(zip(self._scalar_vars, sym.flatten(self._dummy)))
         args = (self._dummy,) + tuple(self.params)
         return autowrap(expr.subs(subs), args=args)
@@ -137,16 +138,16 @@ class OptimizationProblem(object):
             obj = sympify(obj)
         except SympifyError:
             raise TypeError("Couldn't sympify provided objective function.")
-        if not self.depends_only_on_params_or_vars(obj):
+        if not self._depends_only_on_params_or_vars(obj):
             raise ValueError(
                 "Objective function can depend only on declared vars and "
                 "params.")
         if self.mode == "max":
             obj = -obj
         self.obj = obj
-        self.obj_cb = self.autowrap(self.obj)
+        self.obj_cb = self._autowrap(self.obj)
         self.obj_grad = self._grad(self.obj)
-        self.obj_grad_cb = squeezed(self.autowrap(self.obj_grad))
+        self.obj_grad_cb = squeezed(self._autowrap(self.obj_grad))
 
     def _process_constraints(self, con):
         try:
@@ -162,7 +163,7 @@ class OptimizationProblem(object):
                 raise TypeError(
                     f"Constraint expression {c} of type Unequality does not "
                     f"make sense.")
-            if not self.depends_only_on_params_or_vars(c):
+            if not self._depends_only_on_params_or_vars(c):
                 raise ValueError(
                     f"Constraint {c} may only depend on declared vars and "
                     f"params.")
@@ -179,10 +180,10 @@ class OptimizationProblem(object):
             processed.append(c)
 
         self.con = Matrix(processed)
-        self.con_cbs = [self.autowrap(c.lhs) for c in self.con]
+        self.con_cbs = [self._autowrap(c.lhs) for c in self.con]
         self.con_grads = [self._grad(c.lhs) for c in self.con]
 
-        self.con_grad_cbs = [squeezed(self.autowrap(g)) for g in
+        self.con_grad_cbs = [squeezed(self._autowrap(g)) for g in
                              self.con_grads]
 
     def _grad(self, expr):
@@ -205,49 +206,54 @@ class OptimizationProblem(object):
                 f"Bounds must have the same length ({n}) as number of "
                 f"scalar variables.")
         for expr in lb:
-            if not self.depends_only_on_params_or_vars(expr):
+            if not self._depends_only_on_params_or_vars(expr):
                 raise ValueError(
                     f"Lower bound {expr} may only depend on declared params.")
         for expr in ub:
-            if not self.depends_only_on_params_or_vars(expr):
+            if not self._depends_only_on_params_or_vars(expr):
                 raise ValueError(
                     f"Upper bound {expr} may only depend on declared params.")
         self.lb = lb
         self.ub = ub
 
-    def fill_in_params(self, expr, *param_vals):
+    def _fill_in_params(self, expr, *param_vals):
         subs = {p: Matrix(v) if isinstance(p, MatrixSymbol) else v for
                 p, v in zip(self.params, param_vals)}
         return expr.subs(subs)
 
     @squeezed
-    def eval_ub(self, *param_vals):
+    def _eval_ub(self, *param_vals):
         return np.asarray(
-            self.fill_in_params(Matrix(self.ub), *param_vals).evalf())
+            self._fill_in_params(Matrix(self.ub), *param_vals).evalf())
 
     @squeezed
-    def eval_lb(self, *param_vals):
+    def _eval_lb(self, *param_vals):
         return np.asarray(
-            self.fill_in_params(Matrix(self.lb), *param_vals).evalf())
+            self._fill_in_params(Matrix(self.lb), *param_vals).evalf())
 
     def solve(self, x0, *args, method='cyipopt', **kwargs):
-        """ Solve the OptimizationFunction for a particular parameter values.
+        r""" Solve optimization problem for particular parameter values.
 
         Parameters
         ----------
         x0 : ndarray
             The initial condition to use for the optimizer.
-        *args
+        args
             The parameter values to use, defined in the same order (and
             with the same shapes as in `params`). Should be Real scalars
             or Matrix objects with numerical (not symbolic) entries.
         method : str
             Which optimization backend to use. Currently supported are
-            one of 'cyipopt', 'slsqp' (from scipy.optimize), and
-             'cobyla' (from scipy.optimize).
+            one of 'cyipopt', 'slsqp' (from scipy.optimize), and 'cobyla'
+            (from scipy.optimize).
         **kwargs
             Keyword arguments to pass to the optimization backend. See the
             corresponding docs for available options.
+
+        Returns
+        -------
+        sol
+            Solution dictionary. See `scipy.optimize.minimize` for details.
         """
         fun, jac, bounds, constraints = self._prepare(*args)
         method = method.lower()
@@ -270,8 +276,8 @@ class OptimizationProblem(object):
             raise ValueError(f"Unsupported optimization method '{method}'.")
 
     def _prepare(self, *args):
-        lb = self.eval_lb(*args)
-        ub = self.eval_ub(*args)
+        lb = self._eval_lb(*args)
+        ub = self._eval_ub(*args)
 
         # replace infinities with None
         lb[lb == -np.inf] = None
