@@ -10,8 +10,8 @@ conda:
 python:
   version: 3.6
   install:
-    - method: setuptools
-    - path: package
+    - method: pip
+    - path: .
       extra_requirements:
         - testing
         - docs

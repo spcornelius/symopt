@@ -8,7 +8,7 @@ dependencies:
   - numpy
   - numpydoc
   - orderedset
-  - pip
+  - pip==9.0.3
   - pytest
   - pytest-pep8
   - python >= 3.6
