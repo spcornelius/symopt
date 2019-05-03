@@ -11,7 +11,7 @@ version = '0.1.0'
 
 extras_req = {
     'testing': ['pytest', 'pytest-pep8'],
-    'docs': ['sphinx', 'sphinx_rtd_theme', 'numpydoc']
+    'docs': ['sphinx', 'sphinx_rtd_theme', 'numpydoc', 'recommonmark']
 }
 
 extras_req['all'] = list(chain(*extras_req.values()))

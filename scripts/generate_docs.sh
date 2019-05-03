@@ -8,13 +8,13 @@ NARGS=$#
 PKG=$(find . -maxdepth 2 -name __init__.py -print0 | xargs -0 -n1 dirname | xargs basename)
 AUTHOR=$(head -n 1 AUTHORS)
 sphinx-apidoc --full --force -A "$AUTHOR" --module-first --doc-version=$(python setup.py --version) -F -o docs $PKG/ $(find . -type d -name tests)
-cat <<EOF >>docs/index.md
+cat <<EOF >>docs/index.rst
 Overview
 ========
-$(tail -n+3 README.md)
+source/README.md
 EOF
 MATCH="'sphinx.ext.viewcode'"
-NEW="'sphinx.ext.viewcode', 'sphinx.ext.autosummary', 'numpydoc'"
+NEW="'sphinx.ext.viewcode', 'sphinx.ext.autosummary', 'numpydoc', 'recommonmark'"
 sed -i "" "s/$MATCH/$NEW/g" docs/conf.py
 sed -i "" "s/alabaster/sphinx_rtd_theme/g" docs/conf.py
 
