@@ -232,7 +232,7 @@ class OptimizationProblem(object):
             self._fill_in_params(Matrix(self.lb), *param_vals).evalf())
 
     def solve(self, x0, *args, method='cyipopt', **kwargs):
-        r""" Solve optimization problem for particular parameter values.
+        """ Solve optimization problem for particular parameter values.
 
         Parameters
         ----------
