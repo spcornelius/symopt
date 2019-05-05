@@ -89,12 +89,14 @@ class OptimizationProblem(object):
         # Note: having params first is important for use of partial below
         return self.vars | self.params
 
-    def _depends_only_on_params(self, expr):
+    def depends_only_on_params(self, expr):
+        """ Test whether expression depends only on problem parameters """
         # test whether expression's free symbols are only in params
         return sympify(expr).free_symbols <= self.params
 
-    def _depends_only_on_params_or_vars(self, expr):
-        # test whether expression's free symbols are only in params or vars
+    def depends_only_on_params_and_vars(self, expr):
+        """ Test whether expression depends only on problem parameters
+            and/or/vars """
         return sympify(expr).free_symbols <= self.free_symbols
 
     def _process_vars(self, vars):
