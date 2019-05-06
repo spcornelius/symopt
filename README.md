@@ -32,7 +32,7 @@ by:
     lb = [2, 0]
     ub = [p[0], p[1]]
 
-    prob = OptimizationProblem(obj, [x], params=[p], constraints=con,
+    prob = OptimizationProblem(obj, [x1, x2], params=[p], constraints=con,
                                lb=lb, ub=ub, mode='min')
 ```
 That's it. From here, `symopt` will automatically create the corresponding functions to
@@ -41,7 +41,7 @@ as those of the relevant derivatives (e.g. objective and constraint gradients). 
 ```python
     x0 = [2, 2]
     p = [20.0, 50.0]
-    res = prob.solve(x0, p, method='cyipopt')
+    res = prob.solve(x0, p, method='ipopt')
 ```
 Note that the objective function, constraints, and upper/lower
 bounds can depend on the declared parameters. Variables and parameters
