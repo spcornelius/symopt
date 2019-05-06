@@ -17,8 +17,8 @@ Overview
 EOF
 MATCH="'sphinx.ext.viewcode'"
 NEW="'sphinx.ext.viewcode', 'sphinx.ext.autosummary', 'numpydoc', 'm2r'"
-sed -i "" "s/$MATCH/$NEW/g" docs/conf.py
-sed -i "" "s/alabaster/sphinx_rtd_theme/g" docs/conf.py
+sed -i "s/$MATCH/$NEW/g" docs/conf.py
+sed -i "s/alabaster/sphinx_rtd_theme/g" docs/conf.py
 
 echo "autoclass_content = 'both'" >> docs/conf.py # include both class docstring and __init__
 echo "autodoc_default_flags = ['members', 'show-inheritance']" >> docs/conf.py

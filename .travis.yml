@@ -37,6 +37,6 @@ install:
   - conda install -c conda-forge cyipopt;
   - python -m pip install .[all]
 script:
-  - PYTHONPATH=$(pwd) python -m pytest --pep8 --ignore setup.py --ignore build/
+  - PYTHONPATH=$(pwd) python -m pytest --pep8 --ignore setup.py --ignore build/ --ignore docs/
 notifications:
   email: false

@@ -6,8 +6,39 @@ symopt package
     :undoc-members:
     :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+
+    symopt.solvers
+
 Submodules
 ----------
+
+symopt.base module
+------------------
+
+.. automodule:: symopt.base
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+symopt.constraint module
+------------------------
+
+.. automodule:: symopt.constraint
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+symopt.objective module
+-----------------------
+
+.. automodule:: symopt.objective
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 symopt.problem module
 ---------------------
