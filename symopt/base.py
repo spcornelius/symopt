@@ -26,7 +26,7 @@ class SymOptBase(object):
             Derivatives of :py:attr:`expr` with respect to \
             :py:attr:`vars`.
         hess : `~sympy.matrices.immutable.ImmutableDenseMatrix`
-            Second derivatives of py:attr:`expr` with respect to \
+            Second derivatives of :py:attr:`expr` with respect to \
             :py:attr:`vars`.
         cb : `~collections.abc.Callable`
             Function to numerically evaluate :py:attr:`expr`. Has signature
