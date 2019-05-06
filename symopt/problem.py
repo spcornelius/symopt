@@ -24,13 +24,13 @@ class OptimizationProblem(object):
 
         Attributes
         ----------
-        obj : Expr
+        obj : ObjectiveFunction
             The objective function to optimize.
         vars : OrderedSet of Union(Symbol, MatrixSymbol)
             The free variables.
         params : OrderedSet of Union(Symbol, MatrixSymbol)
             The parameters of the objective function and/or constraints.
-        cons : list of Union(GreatherThan, Equality)
+        cons : `ConstraintCollection`
             The constraints, converted to the form `expr >= 0`
             (inequalities) or `expr == 0` (equality).
         lb : list of Expr
@@ -57,7 +57,7 @@ class OptimizationProblem(object):
                 The free variables.
             params : Iterable of Union(Symbol, MatrixSymbol)
                 The parameters of the objective function and/or constraints.
-            cons : Iterable of Relational
+            cons : list of Union(GreatherThan, Equality)
                 The constraints. Can depend on both `vars` and `params`.
             lb : Iterable of Union(Real, Expr)
                 The lower bounds, one for each scalar in `vars`. If
