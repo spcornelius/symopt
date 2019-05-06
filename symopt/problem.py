@@ -39,11 +39,11 @@ class OptimizationProblem(object):
             the problem, after being converted to the form ``expr >= 0``
             (inequalities) or ``expr == 0`` (equality).
         lb : `list` of `~sympy.core.expr.Expr`
-            The lower bounds, one for each scalar in `vars`. If
-            symbolic, should depend only on `params`.
+            The lower bounds, one for each scalar in :py:attr:`vars`. If
+            symbolic, should depend only on :py:attr:`params`.
         ub : `list` of `~sympy.core.expr.Expr`
-            The upper bounds, one for each scalar in `vars`. If
-            symbolic, should depend only on `params`.
+            The upper bounds, one for each scalar in :py:attr:`vars`. If
+            symbolic, should depend only on :py:attr:`params`.
         mode : `str`, either 'max' or 'min'
             Whether the problem is a minimization or maximization problem.
         """
@@ -56,8 +56,8 @@ class OptimizationProblem(object):
             Parameters
             ----------
             obj : `~sympy.core.expr.Expr`
-                The objective function to optimize. Can depend on `vars` and
-                also `params`.
+                The objective function to optimize. Can depend on
+                :py:attr:`vars` and also :py:attr:`params`.
             vars : `~collections.abc.Iterable` of `~typing.Union` \
                     [`~sympy.core.symbol.Symbol`,\
                      `~sympy.matrices.expressions.MatrixSymbol` ]
@@ -67,15 +67,16 @@ class OptimizationProblem(object):
                      `~sympy.matrices.expressions.MatrixSymbol` ]
                 The parameters of the objective function and/or constraints.
             cons : `list` of :class:`~sympy.core.relational.Relational`
-                The constraints. Can depend on both `vars` and `params`.
+                The constraints. Can depend on both :py:attr:`vars` and
+                :py:attr:`params`.
             lb : `~collections.abc.Iterable` of `~typing.Union` \
                 [ `~numbers.Real` , `~sympy.core.expr.Expr` ]
-                The lower bounds, one for each scalar in `vars`. If
-                symbolic, should depend only on `params`.
+                The lower bounds, one for each scalar in :py:attr:`vars`. If
+                symbolic, should depend only on :py:attr:`params`.
             ub : `~collections.abc.Iterable` of `~typing.Union` \
                 [ `~numbers.Real` , `~sympy.core.expr.Expr` ]
-                The upper bounds, one for each scalar in `vars`. If
-                symbolic, should depend only on `params`.
+                The upper bounds, one for each scalar in :py:attr:`vars`. If
+                symbolic, should depend only on :py:attr:`params`.
             mode : `str`, either 'max' or 'min'
                 Whether the objective function should be minimized or
                 maximized (default 'min').
@@ -157,13 +158,13 @@ class OptimizationProblem(object):
         ----------
         *param_vals
             Params at which to numerically evaluate problem bounds. Should
-            be provided in same the same order as `self.params`.
+            be provided in same the same order as :py:attr:`self.params`.
 
         Returns
         -------
-        `tuple`
-            Two `numpy.ndarray` s corresponding to the lower/upper
-            bounds for each scalar variable in the problem, in sequence."""
+        (`numpy.ndarray`, `numpy.ndarray`)
+            Arrays giving the the lower/upper bounds for each scalar variable
+            in the problem, in sequence."""
         lb = np.asarray(
             self._fill_in_params(Matrix(self.lb), *param_vals).evalf())
         ub = np.asarray(
@@ -179,9 +180,9 @@ class OptimizationProblem(object):
             The initial guess for the optimizer.
         *args
             The parameter values to use, defined in the same order (and
-            with the same shapes as in `params`). Should be `~numbers.Real`
-            scalars or `~sympy.matrices.matrices.MatrixBase` objects with
-            `~numbers.Real` entries.
+            with the same shapes as in :py:attr:`self.params`). Should be
+            `~numbers.Real` scalars or `~sympy.matrices.matrices.MatrixBase`
+            objects with `~numbers.Real` entries.
         method : `str`
             Which optimization backend to use. Currently supported are
             one of 'ipopt', 'slsqp' (from :mod:`scipy.optimize`), and

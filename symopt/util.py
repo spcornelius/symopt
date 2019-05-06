@@ -28,7 +28,7 @@ def negated(fun):
     Returns
     -------
     `~collections.abc.Callable`
-        New function with same signature as `fun` that
+        New function with same signature as :py:attr:`fun` that
         returns ``-fun(*args, **kwargs)``.
     """
 
@@ -53,8 +53,8 @@ def depends_only_on(expr, syms):
     Returns
     -------
     `bool`
-        `True` if the free symbols in `expr` are contained in `syms`,
-        `False` otherwise.
+        `True` if the free symbols in :py:attr:`expr` are contained in \
+        :py:attr:`syms`, `False` otherwise.
     """
     return sympify(expr).free_symbols <= set(syms)
 
@@ -70,7 +70,7 @@ def squeezed(fun):
     Returns
     -------
     wrapped : `~collections.abc.Callable`
-        New function with same signature as `fun` that returns
+        New function with same signature as :py:attr:`fun` that returns
         ``fun(*args, **kwargs).squeeze()``.
     """
     def wrapped(*args, **kwargs):
@@ -91,7 +91,7 @@ def as_scalars(var):
     Returns
     -------
     `~typing.Union` [ `list` , `~sympy.matrices.matrices.MatrixBase` ]
-        ``var.as_explicit()`` if `var` is an instance of \
+        ``var.as_explicit()`` if :py:attr:`var` is an instance of \
          `~sympy.matrices.expressions.MatrixSymbol` otherwise ``[var]``.
     """
     if isinstance(var, MatrixSymbol):
@@ -113,7 +113,7 @@ def chain_scalars(vars):
     Yields
     ------
     `~sympy.core.symbol.Symbol`
-        Successive constituent scalars in `vars`.
+        Successive constituent scalars in :py:attr:`vars`.
     """
     yield from chain(*map(as_scalars, vars))
 
@@ -131,8 +131,8 @@ def is_linear(expr, vars):
     Returns
     -------
     `bool`
-        `True` if `expr` is jointly linear w.r.t. all variables in `vars`,
-        otherwise `False` .
+        `True` if `expr` is jointly linear w.r.t. all variables in\
+        :py:attr:`vars`, otherwise `False` .
     """
     pairs = combinations_with_replacement(vars, 2)
     try:
@@ -156,7 +156,7 @@ def is_quadratic(expr, vars):
     -------
     `bool`
         `True` if `expr` is at most jointly quadratic w.r.t. all variables in
-        `vars`, otherwise `False` .
+        :py:attr:`vars`, otherwise `False` .
     """
     vars = OrderedSet(vars)
     pairs = combinations_with_replacement(vars, 2)
