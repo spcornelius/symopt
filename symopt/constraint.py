@@ -16,7 +16,8 @@ class ConstraintCollection(Sequence):
         an optimization problem's constraint set as a whole.
         """
 
-    def __init__(self, cons, vars, params, wrap_using='lambdify'):
+    def __init__(self, cons, vars, params, wrap_using='lambdify',
+                 simplify=True):
         """ A collection of optimization constraints.
 
         Effectively just a list of `~.Constraint` objects. However, this
@@ -37,13 +38,17 @@ class ConstraintCollection(Sequence):
                   `~sympy.matrices.expressions.MatrixSymbol` ]
             The symbolic parameters.
         wrap_using : `str`, either 'lambdify' or 'autowrap'
-                Which backend to use for wrapping the
-                constraints and their derivatives for numerical
-                evaluation. See :func:`~sympy.utilities.lambdify.lambdify` and
-                :func:`~sympy.utilities.autowrap.autowrap` for more details.
-                Defaults to 'lambdify'.
+            Which backend to use for wrapping the
+            constraints and their derivatives for numerical
+            evaluation. See :func:`~sympy.utilities.lambdify.lambdify` and
+            :func:`~sympy.utilities.autowrap.autowrap` for more details.
+            Defaults to 'lambdify'.
+        simplify : `bool`
+            If `True`, simplify constraints and their derivatives
+            before wrapping as functions. Defaults to `True`.
         """
-        self._cons = [Constraint(c, vars, params, wrap_using=wrap_using) for c
+        self._cons = [Constraint(c, vars, params, wrap_using=wrap_using,
+                                 simplify=simplify) for c
                       in cons]
 
     def __iter__(self):
@@ -78,7 +83,8 @@ class ConstraintCollection(Sequence):
 class Constraint(SymOptBase):
     """ Symbolic (non)linear optimization constraint. """
 
-    def __init__(self, con, vars, params, wrap_using='lambdify'):
+    def __init__(self, con, vars, params, wrap_using='lambdify',
+                 simplify=True):
         """ Symbolic (non)linear optimization constraint.
 
         Parameters
@@ -94,11 +100,14 @@ class Constraint(SymOptBase):
                   `~sympy.matrices.expressions.MatrixSymbol` ]
             The symbolic parameters.
         wrap_using : `str`, either 'lambdify' or 'autowrap'
-                Which backend to use for wrapping the
-                constraint and its derivatives for numerical
-                evaluation. See :func:`~sympy.utilities.lambdify.lambdify` and
-                :func:`~sympy.utilities.autowrap.autowrap` for more details.
-                Defaults to 'lambdify'.
+            Which backend to use for wrapping the
+            constraint and its derivatives for numerical
+            evaluation. See :func:`~sympy.utilities.lambdify.lambdify` and
+            :func:`~sympy.utilities.autowrap.autowrap` for more details.
+            Defaults to 'lambdify'.
+        simplify : `bool`
+            If `True`, simplify constraint and its derivatives
+            before wrapping as functions. Defaults to `True`.
         """
         try:
             con = sympify(con)
@@ -114,7 +123,8 @@ class Constraint(SymOptBase):
                 f"make sense.")
 
         self._con = con.__class__(con.lhs - con.rhs, 0)
-        super().__init__(self._con.lhs, vars, params, wrap_using=wrap_using)
+        super().__init__(self._con.lhs, vars, params, wrap_using=wrap_using,
+                         simplify=simplify)
 
     def __str__(self):
         return str(self._con)

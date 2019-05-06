@@ -40,7 +40,8 @@ class SymOptBase(object):
             ``hess_cb(*vars, *params) -->`` 2D `numpy.ndarray`.
         """
 
-    def __init__(self, expr, vars, params, wrap_using='autowrap'):
+    def __init__(self, expr, vars, params, wrap_using='autowrap',
+                 simplify=True):
         """ Base class for symbolic expression with automatic derivatives
         and function wrapping.
 
@@ -61,6 +62,9 @@ class SymOptBase(object):
                  `~sympy.matrices.expressions.MatrixSymbol` ]
             Parameters appearing in :py:attr:`expr`. Note: not all \
             :py:attr:`params` need appear in :py:attr:`expr`.
+        simplify : `bool`
+            If `True`, simplify :py:attr:`expr` and its derivatives
+            before wrapping as functions. Defaults to `True`.
         """
 
         try:
@@ -87,6 +91,8 @@ class SymOptBase(object):
 
         def _wrap(_expr):
             _expr = _expr.subs(subs)
+            if simplify:
+                _expr = _expr.simplify()
             if self.wrap_using == 'autowrap':
                 return autowrap(_expr, args=args)
             else:
