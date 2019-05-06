@@ -30,7 +30,7 @@ class OptimizationProblem(object):
             The free variables.
         params : OrderedSet of Union(Symbol, MatrixSymbol)
             The parameters of the objective function and/or constraints.
-        cons : `ConstraintCollection`
+        cons : ConstraintCollection
             The constraints, converted to the form `expr >= 0`
             (inequalities) or `expr == 0` (equality).
         lb : list of Expr
