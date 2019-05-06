@@ -1,7 +1,9 @@
 from collections.abc import Sequence
+
 from sympy import sympify, Unequality, SympifyError, Equality, LessThan, \
     StrictLessThan
 from sympy.core.relational import Relational
+
 from symopt.base import SymOptBase
 from symopt.util import negated
 
@@ -14,8 +16,35 @@ class ConstraintCollection(Sequence):
         an optimization problem's constraint set as a whole.
         """
 
-    def __init__(self, cons, vars, params):
-        self._cons = [Constraint(c, vars, params) for c in cons]
+    def __init__(self, cons, vars, params, wrap_using='lambdify'):
+        """ A collection of optimization constraints.
+
+        Effectively just a list of `~.Constraint` objects. However, this
+        wrapper provides some convenient functions that operate on
+        an optimization problem's constraint set as a whole.
+
+        Parameters
+        ----------
+        cons : `~collections.abc.Iterable` of \
+                `~sympy.core.relational.Relational`
+            The constraints, in terms of :py:attr:`vars` and :py:attr:`params`.
+        vars : `~collections.abc.Sequence` of `~typing.Union` \
+                 [ `~sympy.core.symbol.Symbol`,\
+                  `~sympy.matrices.expressions.MatrixSymbol` ]
+            The symbolic variables.
+        params : `~collections.abc.Sequence` of `~typing.Union` \
+                 [ `~sympy.core.symbol.Symbol`,\
+                  `~sympy.matrices.expressions.MatrixSymbol` ]
+            The symbolic parameters.
+        wrap_using : `str`, either 'lambdify' or 'autowrap'
+                Which backend to use for wrapping the
+                constraints and their derivatives for numerical
+                evaluation. See :func:`~sympy.utilities.lambdify.lambdify` and
+                :func:`~sympy.utilities.autowrap.autowrap` for more details.
+                Defaults to 'lambdify'.
+        """
+        self._cons = [Constraint(c, vars, params, wrap_using=wrap_using) for c
+                      in cons]
 
     def __iter__(self):
         yield from self._cons
@@ -49,7 +78,28 @@ class ConstraintCollection(Sequence):
 class Constraint(SymOptBase):
     """ Symbolic (non)linear optimization constraint. """
 
-    def __init__(self, con, vars, params):
+    def __init__(self, con, vars, params, wrap_using='lambdify'):
+        """ Symbolic (non)linear optimization constraint.
+
+        Parameters
+        ----------
+        con : `~sympy.core.relational.Relational`
+            The constraint, in terms of :py:attr:`vars` and :py:attr:`params`.
+        vars : `~collections.abc.Sequence` of `~typing.Union` \
+                 [ `~sympy.core.symbol.Symbol`,\
+                  `~sympy.matrices.expressions.MatrixSymbol` ]
+            The symbolic variables.
+        params : `~collections.abc.Sequence` of `~typing.Union` \
+                 [ `~sympy.core.symbol.Symbol`,\
+                  `~sympy.matrices.expressions.MatrixSymbol` ]
+            The symbolic parameters.
+        wrap_using : `str`, either 'lambdify' or 'autowrap'
+                Which backend to use for wrapping the
+                constraint and its derivatives for numerical
+                evaluation. See :func:`~sympy.utilities.lambdify.lambdify` and
+                :func:`~sympy.utilities.autowrap.autowrap` for more details.
+                Defaults to 'lambdify'.
+        """
         try:
             con = sympify(con)
         except (AttributeError, SympifyError):
@@ -64,7 +114,7 @@ class Constraint(SymOptBase):
                 f"make sense.")
 
         self._con = con.__class__(con.lhs - con.rhs, 0)
-        super().__init__(self._con.lhs, vars, params)
+        super().__init__(self._con.lhs, vars, params, wrap_using=wrap_using)
 
     def __str__(self):
         return str(self._con)

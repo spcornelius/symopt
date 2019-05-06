@@ -49,7 +49,8 @@ class OptimizationProblem(object):
         """
 
     def __init__(self, obj, vars, lb=None, ub=None,
-                 cons=None, params=None, mode="min"):
+                 cons=None, params=None, mode="min",
+                 wrap_using='lambdify'):
         """ Optimization problem with symbolic objective function, constraints,
             and/or parameters.
 
@@ -80,16 +81,25 @@ class OptimizationProblem(object):
             mode : `str`, either 'max' or 'min'
                 Whether the objective function should be minimized or
                 maximized (default 'min').
+            wrap_using : `str`, either 'lambdify' or 'autowrap'
+                Which backend to use for wrapping the
+                objective/constraint/derivative expressions for numerical
+                evaluation. See :func:`~sympy.utilities.lambdify.lambdify` and
+                :func:`~sympy.utilities.autowrap.autowrap` for more details.
+                Defaults to 'lambdify'.
         """
         self.mode = str(mode).lower()
+        wrap_using = str(wrap_using).lower()
         if mode not in ["min", "max"]:
             raise ValueError(
                 "Optimization mode must be one of ['min', 'max'].")
         self._process_vars(vars)
         self._process_params(params)
         self._process_bounds(lb, ub)
-        self.obj = ObjectiveFunction(obj, self.vars, self.params)
-        self.cons = ConstraintCollection(cons, self.vars, self.params)
+        self.obj = ObjectiveFunction(obj, self.vars, self.params,
+                                     wrap_using=wrap_using)
+        self.cons = ConstraintCollection(cons, self.vars, self.params,
+                                         wrap_using=wrap_using)
 
     def _process_vars(self, vars):
         if vars is None:

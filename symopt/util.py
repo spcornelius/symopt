@@ -1,9 +1,10 @@
-import sympy as sym
 from itertools import chain
-from orderedset import OrderedSet
-from sympy import MatrixSymbol, sympify
 from itertools import combinations_with_replacement
 
+import sympy as sym
+import numpy as np
+from orderedset import OrderedSet
+from sympy import Symbol, MatrixSymbol, sympify, DeferredVector
 
 __all__ = []
 __all__.extend([
@@ -13,7 +14,9 @@ __all__.extend([
     'is_linear',
     'is_quadratic',
     'depends_only_on',
-    'negated'
+    'negated',
+    'reshape_like',
+    'reshape_args'
 ])
 
 
@@ -73,6 +76,7 @@ def squeezed(fun):
         New function with same signature as :py:attr:`fun` that returns
         ``fun(*args, **kwargs).squeeze()``.
     """
+
     def wrapped(*args, **kwargs):
         return fun(*args, **kwargs).squeeze()
 
@@ -164,3 +168,57 @@ def is_quadratic(expr, vars):
         return not any((sym.diff(expr, *t).free_symbols & vars) for t in pairs)
     except TypeError:
         return False
+
+
+def reshape_like(arg, sym):
+    """ Reshape numeric argument to match that of a symbolic variable.
+
+    Parameters
+    ----------
+    arg : `~typing.Union` [ `Real`, `~numpy.ndarray` ]
+        Numeric data
+    vars : `~typing.Union` [ `~sympy.core.symbol.Symbol`,\
+                            `~sympy.matrices.expressions.MatrixSymbol` ]
+        Symbolic variable whose shape :py:attr:`arg` should match.
+
+    Returns
+    -------
+    `~numbers.Real` or `~numpy.ndarray`
+        The reshaped numeric data.
+    """
+    if isinstance(sym, Symbol):
+        return float(arg)
+    elif isinstance(sym, MatrixSymbol):
+        return np.asfarray(arg).reshape(sym.shape)
+    elif isinstance(sym, DeferredVector):
+        return np.asfarray(arg).flatten()
+    else:
+        raise TypeError(
+            f"Can't understand symbolic variable {sym} with type {type(sym)}.")
+
+
+def reshape_args(func, args):
+    """ Wrap an function to pre-shape numeric param inputs correctly.
+
+        Parameters
+        ----------
+        func : `~collections.abc.Callable`
+            Function to wrap, with signature ``fun(x[:], *arg_vals)``
+        args : `~collections.abc.Iterable` of `~typing.Union` \
+                 [ `~sympy.core.symbol.Symbol`,\
+                  `~sympy.matrices.expressions.MatrixSymbol` ]
+            Symbolic parameters.
+
+        Returns
+        -------
+        wrapped : `~collections.abc.Callable`
+            New function with same signature as :py:attr:`func`, but for
+            which ``argvals`` are pre-processed to match the shapes of
+            the symbols in :py:attr:`args`.
+    """
+    def wrapped(*arg_vals):
+        new_args = tuple(reshape_like(val, arg) for
+                         arg, val in zip(args, arg_vals))
+        return func(*new_args)
+
+    return wrapped

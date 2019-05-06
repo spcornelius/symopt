@@ -1,8 +1,9 @@
 import sympy as sym
 from sympy.utilities.autowrap import autowrap
+from sympy import lambdify
 
 from symopt.util import chain_scalars, squeezed, is_linear, is_quadratic, \
-    depends_only_on
+    depends_only_on, reshape_args
 
 
 class SymOptBase(object):
@@ -39,7 +40,7 @@ class SymOptBase(object):
             ``hess_cb(*vars, *params) -->`` 2D `numpy.ndarray`.
         """
 
-    def __init__(self, expr, vars, params):
+    def __init__(self, expr, vars, params, wrap_using='autowrap'):
         """ Base class for symbolic expression with automatic derivatives
         and function wrapping.
 
@@ -74,6 +75,7 @@ class SymOptBase(object):
         self.expr = expr
         self.vars = vars
         self.params = params
+        self.wrap_using = str(wrap_using).lower()
 
         scalar_vars = list(chain_scalars(vars))
         self.grad = sym.ImmutableMatrix([expr.diff(s) for s in scalar_vars])
@@ -83,12 +85,17 @@ class SymOptBase(object):
         subs = dict(zip(scalar_vars, sym.flatten(x)))
         args = (x,) + tuple(self.params)
 
-        def _autowrap(_expr):
-            return autowrap(_expr.subs(subs), args=args)
+        def _wrap(_expr):
+            _expr = _expr.subs(subs)
+            if self.wrap_using == 'autowrap':
+                return autowrap(_expr, args=args)
+            else:
+                return reshape_args(lambdify(args, _expr),
+                                    args)
 
-        self.cb = _autowrap(self.expr)
-        self.grad_cb = squeezed(_autowrap(self.grad))
-        self.hess_cb = squeezed(_autowrap(self.hess))
+        self.cb = _wrap(self.expr)
+        self.grad_cb = squeezed(_wrap(self.grad))
+        self.hess_cb = squeezed(_wrap(self.hess))
 
     def is_linear(self):
         """ Return `True` if :py:attr:`self.expr` is linear in
