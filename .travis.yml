@@ -27,7 +27,7 @@ before_install:
   - conda config --set always_yes yes --set changeps1 no;
   - conda update -q conda;
 install:
-  - conda create -f environment.yml;
+  - conda env create -f environment.yml;
   - conda activate symopt;
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       conda install gfortran_osx-64;
