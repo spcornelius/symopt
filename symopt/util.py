@@ -22,14 +22,14 @@ def negated(fun):
 
     Parameters
     ----------
-    fun : callable
+    fun : `~collections.abc.Callable`
         Function with numeric or array-like output.
 
     Returns
     -------
-    callable
+    `~collections.abc.Callable`
         New function with same signature as `fun` that
-        returns `-fun(*args, **kwargs)`.
+        returns ``-fun(*args, **kwargs)``.
     """
 
     def wrapped(*args, **kwargs):
@@ -43,16 +43,18 @@ def depends_only_on(expr, syms):
 
     Parameters
     ----------
-    expr : Expr
+    expr : `~sympy.core.expr.Expr`
         SymPy expression to evaluate.
-    syms : Iterable of Union(Symbol, MatrixSymbol)
+    syms : `~collections.abc.Iterable` of `~typing.Union` \
+            [`~sympy.core.symbol.Symbol` , \
+            `~sympy.matrices.expressions.MatrixSymbol` ]
         Allowed symbols.
 
     Returns
     -------
-    bool
-        True if the free symbols in `expr` are contained in `syms`,
-        False otherwise.
+    `bool`
+        `True` if the free symbols in `expr` are contained in `syms`,
+        `False` otherwise.
     """
     return sympify(expr).free_symbols <= set(syms)
 
@@ -62,14 +64,14 @@ def squeezed(fun):
 
     Parameters
     ----------
-    fun : callable
+    fun : `~collections.abc.Callable`
         Function to wrap.
 
     Returns
     -------
-    wrapped : callable
+    wrapped : `~collections.abc.Callable`
         New function with same signature as `fun` that returns
-        `fun(*args, **kwargs).squeeze()`.
+        ``fun(*args, **kwargs).squeeze()``.
     """
     def wrapped(*args, **kwargs):
         return fun(*args, **kwargs).squeeze()
@@ -82,13 +84,15 @@ def as_scalars(var):
 
     Parameters
     ----------
-    var : Union(Symbol, MatrixSymbol)
+    var : `~typing.Union` [`~sympy.core.symbol.Symbol` \
+                           `~sympy.matrices.expressions.MatrixSymbol` ]
         Symbolic variable to decompose.
 
     Returns
     -------
-    Union(list, Matrix)
-        `var.as_explicit()` if `var` is a MatrixSymbol, otherwise `[var]`.
+    `~typing.Union` [ `list` , `~sympy.matrices.matrices.MatrixBase` ]
+        ``var.as_explicit()`` if `var` is an instance of \
+         `~sympy.matrices.expressions.MatrixSymbol` otherwise ``[var]``.
     """
     if isinstance(var, MatrixSymbol):
         return sym.flatten(var.as_explicit())
@@ -101,12 +105,14 @@ def chain_scalars(vars):
 
     Parameters
     ----------
-    vars : Iterable of Union(Symbol, MatrixSymbol)
+    vars : `~collections.abc.Iterable` of `~typing.Union` \
+            [`~sympy.core.symbol.Symbol` \
+             `~sympy.matrices.expressions.MatrixSymbol` ]
         Symbolic variables over which to iterate.
 
     Yields
     ------
-    Symbol
+    `~sympy.core.symbol.Symbol`
         Successive constituent scalars in `vars`.
     """
     yield from chain(*map(as_scalars, vars))
@@ -117,16 +123,16 @@ def is_linear(expr, vars):
 
     Parameters
     ----------
-    expr : Expr
+    expr : `~sympy.core.expr.Expr`
         SymPy expression to test.
-    vars : Iterable of Symbol
+    vars : `~collections.abc.Iterable` of `~sympy.core.symbol.Symbol`
         The (scalar) variables of interest.
 
     Returns
     -------
-    bool
-        True if `expr` is jointly linear w.r.t. all variables in `vars`,
-        otherwise False.
+    `bool`
+        `True` if `expr` is jointly linear w.r.t. all variables in `vars`,
+        otherwise `False` .
     """
     pairs = combinations_with_replacement(vars, 2)
     try:
@@ -141,16 +147,16 @@ def is_quadratic(expr, vars):
 
     Parameters
     ----------
-    expr : Expr
+    expr : `~sympy.core.expr.Expr`
         SymPy expression to test.
-    vars : Iterable of Symbol
+    vars : `~collections.abc.Iterable` of `~sympy.core.symbol.Symbol`
         The (scalar) variables of interest.
 
     Returns
     -------
-    bool
-        True if `expr` is at most jointly quadratic w.r.t. all variables in
-        `vars`, otherwise False.
+    `bool`
+        `True` if `expr` is at most jointly quadratic w.r.t. all variables in
+        `vars`, otherwise `False` .
     """
     vars = OrderedSet(vars)
     pairs = combinations_with_replacement(vars, 2)

@@ -40,7 +40,7 @@ release = '0.1.0'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.viewcode', 'sphinx.ext.autosummary', 'numpydoc', 'm2r',
+    'sphinx.ext.viewcode', 'sphinx.ext.autosummary', 'sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'numpydoc', 'm2r',
     'sphinx.ext.todo',
 ]
 
@@ -182,9 +182,16 @@ epub_exclude_files = ['search.html']
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+default_role = 'obj'
 autoclass_content = 'both'
 autodoc_default_flags = ['members', 'show-inheritance']
 autosummary_generate = True
 numpydoc_class_members_toctree = False
 numpydoc_attributes_as_param_list = False
 pygments_style = 'sphinx'
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None),
+                             'numpy': ('https://docs.scipy.org/doc/numpy', None),
+                             'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
+                             'orderedset': ('https://orderedset.readthedocs.io/en/latest/', None),
+                             'sympy': ('https://docs.sympy.org/latest/', None)
+                             }

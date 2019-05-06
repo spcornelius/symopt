@@ -12,30 +12,30 @@ class SymOptBase(object):
 
         Attributes
         ----------
-        expr : Expr
+        expr : `~sympy.core.expr.Expr`
             Relevant symbolic expression in a child class, i.e. the thing
             that should have derivatives/function wrapping.
-        vars : Sequence
-            Symbolic variables. Note: not all `vars` need appear in `expr`;
-            they merely define over what to take derivatives of `expr`,
-            and the signature of the functions to numerically
-            evaluate it and its derivatives.
-        params : Sequence
-            Parameters appearing in `expr`. Note: not all `params` need appear
-            in `expr`.
-        grad : Matrix
+        vars : `~collections.abc.Sequence` of `~typing.Union` \
+                [`~sympy.core.symbol.Symbol`,\
+                 `~sympy.matrices.expressions.MatrixSymbol` ]
+            Symbolic variables.
+        params : `~collections.abc.Sequence` of `~typing.Union` \
+                [`~sympy.core.symbol.Symbol`,\
+                 `~sympy.matrices.expressions.MatrixSymbol` ]
+            Symbolic parameters.
+        grad : `~sympy.matrices.immutable.ImmutableDenseMatrix`
             Derivatives of `expr` with respect to `vars`.
-        hess : Matrix
+        hess : `~sympy.matrices.immutable.ImmutableDenseMatrix`
             Second derivatives of `expr` with respect to `vars`.
-        cb : callable
+        cb : `~collections.abc.Callable`
             Function to numerically evaluate `expr`. Has signature
-            `cb(*vars, *params)` --> `float`.
-        grad_cb : callable
+            ``cb(*vars, *params) -->`` `float`.
+        grad_cb : `~collections.abc.Callable`
             Function to numerically evaluate `grad`. Has signature
-            `grad_cb(*vars, *params)` --> 1D `ndarray`.
-        hess_cb : callable
+            ``grad_cb(*vars, *params) -->`` 1D `numpy.ndarray`.
+        hess_cb : `~collections.abc.Callable`
             Function to numerically evaluate `hess`. Has signature
-            `hess_cb(*vars, *params)` --> 2D `ndarray`.
+            ``hess_cb(*vars, *params) -->`` 2D `numpy.ndarray`.
         """
 
     def __init__(self, expr, vars, params):
@@ -44,15 +44,19 @@ class SymOptBase(object):
 
         Parameters
         ----------
-        expr : Expr
+        expr : `~sympy.core.expr.Expr`
             Relevant symbolic expression, as specified by a child class.
             I.e. the thing that should have derivatives/function wrapping.
-        vars : Sequence
+        vars : `~collections.abc.Sequence` of `~typing.Union` \
+                [`~sympy.core.symbol.Symbol`,\
+                 `~sympy.matrices.expressions.MatrixSymbol` ]
             Symbolic variables. Note: not all `vars` need appear in `expr`;
             they merely define over what to take derivatives of `expr`,
             and the signature of the functions to numerically
             evaluate it and its derivatives.
-        params : Sequence
+        params : `~collections.abc.Sequence` of `~typing.Union` \
+                [`~sympy.core.symbol.Symbol`,\
+                 `~sympy.matrices.expressions.MatrixSymbol` ]
             Parameters appearing in `expr`. Note: not all `params` need appear
             in `expr`.
         """
@@ -71,8 +75,8 @@ class SymOptBase(object):
         self.params = params
 
         scalar_vars = list(chain_scalars(vars))
-        self.grad = sym.Matrix([expr.diff(s) for s in scalar_vars])
-        self.hess = self.grad.jacobian(scalar_vars)
+        self.grad = sym.ImmutableMatrix([expr.diff(s) for s in scalar_vars])
+        self.hess = sym.ImmutableMatrix(self.grad.jacobian(scalar_vars))
 
         x = sym.MatrixSymbol('x', len(scalar_vars), 1)
         subs = dict(zip(scalar_vars, sym.flatten(x)))

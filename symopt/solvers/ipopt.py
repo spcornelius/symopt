@@ -13,7 +13,7 @@ INF = 10.0 ** 19
 
 
 def solve_ipopt(prob, x0, *args, **kwargs):
-    """ Solve a given OptimizationProblem using Ipopt. """
+    """ Solve a given `.OptimizationProblem` using Ipopt. """
     if 'print_level' not in kwargs:
         kwargs['print_level'] = 0
     kwargs['nlp_scaling_method'] = 'user-scaling'

@@ -9,7 +9,7 @@ from symopt.util import negated
 class ConstraintCollection(Sequence):
     """ A collection of optimization constraints.
 
-        Effectively just a list of Constraint objects. However, this
+        Effectively just a list of `~.Constraint` objects. However, this
         wrapper provides some convenient functions that operate on
         an optimization problem's constraint set as a whole.
         """
@@ -71,13 +71,13 @@ class Constraint(SymOptBase):
 
     @property
     def type(self):
-        """ The type (a subclass of of SymPy's Relational) of this
-            constraint (greater than, less than, equality, etc.)."""
+        """ The type (a subclass of of `sympy.core.relational.Relational` )
+            of this constraint (greater than, less than, equality, etc.)."""
         return self._con.__class__
 
     def as_scipy_dict(self, *args):
-        """ Represent the constraint as a dictionary for use with
-            `scipy.optimize.minimize`.
+        """ Represent the constraint as a dictionary for use with \
+            :func:`scipy.optimize.minimize`.
 
         Parameters
         ----------
@@ -86,9 +86,9 @@ class Constraint(SymOptBase):
 
         Returns
         -------
-        dict
-            Constraint dict. See documentation for `scipy.optimize.minimize`
-            for details.
+        `dict`
+            Constraint dictionary. See documentation for\
+            :func:`scipy.optimize.minimize` for details.
         """
         fun = self.cb
         jac = self.grad_cb

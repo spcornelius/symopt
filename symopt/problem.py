@@ -24,22 +24,27 @@ class OptimizationProblem(object):
 
         Attributes
         ----------
-        obj : ObjectiveFunction
+        obj : `.ObjectiveFunction`
             The objective function to optimize.
-        vars : OrderedSet of Union(Symbol, MatrixSymbol)
+        vars : `~orderedset.OrderedSet` of `~typing.Union` \
+                [`~sympy.core.symbol.Symbol`,\
+                 `~sympy.matrices.expressions.MatrixSymbol` ]
             The free variables.
-        params : OrderedSet of Union(Symbol, MatrixSymbol)
+        params : `~orderedset.OrderedSet` of `~typing.Union` \
+                [`~sympy.core.symbol.Symbol`,\
+                 `~sympy.matrices.expressions.MatrixSymbol` ]
             The parameters of the objective function and/or constraints.
-        cons : ConstraintCollection
-            The constraints, converted to the form `expr >= 0`
-            (inequalities) or `expr == 0` (equality).
-        lb : list of Expr
+        cons : `.ConstraintCollection`
+            The `.Constraint` objects representing the constraints of
+            the problem, after being converted to the form ``expr >= 0``
+            (inequalities) or ``expr == 0`` (equality).
+        lb : `list` of `~sympy.core.expr.Expr`
             The lower bounds, one for each scalar in `vars`. If
             symbolic, should depend only on `params`.
-        ub : list of Expr
+        ub : `list` of `~sympy.core.expr.Expr`
             The upper bounds, one for each scalar in `vars`. If
             symbolic, should depend only on `params`.
-        mode : `str`, one of 'max' or 'min'
+        mode : `str`, either 'max' or 'min'
             Whether the problem is a minimization or maximization problem.
         """
 
@@ -50,19 +55,25 @@ class OptimizationProblem(object):
 
             Parameters
             ----------
-            obj : Expr
+            obj : `~sympy.core.expr.Expr`
                 The objective function to optimize. Can depend on `vars` and
                 also `params`.
-            vars : Iterable of Union(Symbol, MatrixSymbol)
+            vars : `~collections.abc.Iterable` of `~typing.Union` \
+                    [`~sympy.core.symbol.Symbol`,\
+                     `~sympy.matrices.expressions.MatrixSymbol` ]
                 The free variables.
-            params : Iterable of Union(Symbol, MatrixSymbol)
+            params : `~collections.abc.Iterable` of `~typing.Union` \
+                    [`~sympy.core.symbol.Symbol`,\
+                     `~sympy.matrices.expressions.MatrixSymbol` ]
                 The parameters of the objective function and/or constraints.
-            cons : list of Union(GreatherThan, Equality)
+            cons : `list` of :class:`~sympy.core.relational.Relational`
                 The constraints. Can depend on both `vars` and `params`.
-            lb : Iterable of Union(Real, Expr)
+            lb : `~collections.abc.Iterable` of `~typing.Union` \
+                [ `~numbers.Real` , `~sympy.core.expr.Expr` ]
                 The lower bounds, one for each scalar in `vars`. If
                 symbolic, should depend only on `params`.
-            ub : Iterable of Union(Real, Expr)
+            ub : `~collections.abc.Iterable` of `~typing.Union` \
+                [ `~numbers.Real` , `~sympy.core.expr.Expr` ]
                 The upper bounds, one for each scalar in `vars`. If
                 symbolic, should depend only on `params`.
             mode : `str`, either 'max' or 'min'
@@ -150,9 +161,9 @@ class OptimizationProblem(object):
 
         Returns
         -------
-        tuple
-            Two ndarrays corresponding to the lower/upper bounds for each
-            scalar variable in the problem, in sequence."""
+        `tuple`
+            Two `numpy.ndarray` s corresponding to the lower/upper
+            bounds for each scalar variable in the problem, in sequence."""
         lb = np.asarray(
             self._fill_in_params(Matrix(self.lb), *param_vals).evalf())
         ub = np.asarray(
@@ -164,16 +175,17 @@ class OptimizationProblem(object):
 
         Parameters
         ----------
-        x0 : ndarray
-            The initial condition to use for the optimizer.
-        args
+        x0 : `numpy.ndarray`
+            The initial guess for the optimizer.
+        *args
             The parameter values to use, defined in the same order (and
-            with the same shapes as in `params`). Should be Real scalars
-            or Matrix objects with numerical (not symbolic) entries.
-        method : str
+            with the same shapes as in `params`). Should be `~numbers.Real`
+            scalars or `~sympy.matrices.matrices.MatrixBase` objects with
+            `~numbers.Real` entries.
+        method : `str`
             Which optimization backend to use. Currently supported are
-            one of 'ipopt', 'slsqp' (from `scipy.optimize`), and 'cobyla'
-            (from `scipy.optimize`).
+            one of 'ipopt', 'slsqp' (from :mod:`scipy.optimize`), and
+            'cobyla' (from :mod:`scipy.optimize`).
         **kwargs
             Keyword arguments to pass to the optimization backend. See the
             corresponding docs for available options.
@@ -181,7 +193,8 @@ class OptimizationProblem(object):
         Returns
         -------
         sol
-            Solution dictionary. See `scipy.optimize.minimize` for details.
+            Solution dictionary. See :func:`scipy.optimize.minimize`
+            for details.
         """
         try:
             return solve[method](self, x0, *args, **kwargs)

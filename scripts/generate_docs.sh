@@ -16,16 +16,29 @@ Overview
 
 EOF
 MATCH="'sphinx.ext.viewcode'"
-NEW="'sphinx.ext.viewcode', 'sphinx.ext.autosummary', 'numpydoc', 'm2r'"
+NEW="'sphinx.ext.viewcode', 'sphinx.ext.autosummary', 'sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'numpydoc', 'm2r'"
 sed -i "s/$MATCH/$NEW/g" docs/conf.py
 sed -i "s/alabaster/sphinx_rtd_theme/g" docs/conf.py
 
+echo "default_role = 'obj'" >> docs/conf.py
 echo "autoclass_content = 'both'" >> docs/conf.py # include both class docstring and __init__
 echo "autodoc_default_flags = ['members', 'show-inheritance']" >> docs/conf.py
 echo "autosummary_generate = True" >> docs/conf.py
 echo "numpydoc_class_members_toctree = False" >>docs/conf.py
 echo "numpydoc_attributes_as_param_list = False" >>docs/conf.py
 echo "pygments_style = 'sphinx'" >>docs/conf.py
+
+
+echo "intersphinx_mapping = {'python': ('https://docs.python.org/3', None),
+                             'numpy': ('https://docs.scipy.org/doc/numpy', None),
+                             'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
+                             'orderedset': ('https://orderedset.readthedocs.io/en/latest/', None),
+                             'sympy': ('https://docs.sympy.org/latest/', None)
+                             }" >> docs/conf.py
+ >> docs/conf.py
+#echo "napoleon_google_docstring = False" >>docs/conf.py
+#echo "napoleon_numpy_docstring = True" >>docs/conf.py
+
 
 ABS_REPO_PATH=$(unset CDPATH && cd "$(dirname "$0")/.." && echo $PWD)
 if [[ ! -d docs/_build/html ]]; then

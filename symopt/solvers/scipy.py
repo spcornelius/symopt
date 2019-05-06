@@ -13,22 +13,23 @@ __all__.extend([
 
 
 def prepare_scipy(prob, *args):
-    """ Convert an OptimizationProblem to inputs for
-    scipy.optimize.minimize.
+    """ Convert an `.OptimizationProblem` to inputs for\
+        :func:`scipy.optimize.minimize`.
 
     Parameters
     ----------
-    prob: OptimizationProblem
+    prob : `.OptimizationProblem`
         Problem to solve
     *args
-        Numerical values for problem parameters
+        Numerical values for problem parameters, supplied with the same order
+        and types as ``prob.vars``.
 
     Returns
     -------
-    tuple
+    `tuple`
         Objective function callback, constraint dictionaries, jacobian
         callback and lower/upper bounds for each variable. See
-        scipy.optimize.minimize for more details."""
+        documentation for :func:`scipy.optimize.minimize` for more details."""
     fun = prob.obj.cb
     jac = prob.obj.grad_cb
 
