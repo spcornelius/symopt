@@ -57,7 +57,10 @@ Dependencies
 * scipy
 * sympy
 * [orderedset](https://pypi.org/project/orderedset/)
-* [cyipopt](https://github.com/matthias-k/cyipopt)
+
+If you want to use the Ipopt backend, you will also need
+
+* [cyipopt](https://github.com/matthias-k/cyipopt) (Optional)
 
 
 License
