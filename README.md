@@ -25,12 +25,12 @@ This can be defined by:
     >>> from sympy import MatrixSymbol, symarray
     
     >>> x1, x2 = symarray('x', 2)
-    >>> p = MatrixSymbol('p')
+    >>> p = MatrixSymbol('p', 2, 1)
     
     >>> prob = OptimizationProblem(mode='min')
+    >>> prob.add_parameter(p)
     >>> prob.add_variable(x1, lb=2, ub=p[0])
     >>> prob.add_variable(x2, lb=0, ub=p[1])
-    >>> prob.add_parameter(p)
     
     >>> prob.obj = x1**2/100 + x2**2
     >>> prob.add_constraints_from([x1 * x2 >= 25,
@@ -48,6 +48,12 @@ One can then solve the problem for specified parameters using `solve`:
     >>> x = [2, 2]
     >>> p = [20.0, 50.0]
     >>> res = prob.solve(x, p, method='ipopt')
+    >>> print(res['success'])
+    True
+    >>> print(res['x'])
+    array([15.8113883 ,  1.58113883])
+    >>> print(res['fun'])
+    5.000000000505797
 ```
 
 Dependencies
