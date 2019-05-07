@@ -78,8 +78,8 @@ class SymOptExpr(object, metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def sympified(self):
-        """ Attribute to return upon calls to \
-            :func:`~sympy.core.sympify.sympify` applied to this object."""
+        """ Symbolic expression that should be returned upon calls to \
+            :func:`~sympy.core.sympify.sympify` when applied to this object."""
 
     def _sympy_(self):
         return self.sympified
@@ -162,7 +162,7 @@ class SymOptSymbol(object):
 
         Parameters
         ----------
-        symbol : `~sympy.core.symbols.Symbol` or \
+        symbol : `~sympy.core.symbol.Symbol` or \
                     `~sympy.matrices.expressions.MatrixSymbol`
             The symbol representing the variable or parameter.
         prob : `.OptimizationProblem`
