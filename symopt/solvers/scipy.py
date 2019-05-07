@@ -44,21 +44,22 @@ def prepare_scipy(prob, *args):
 
 def solve_slsqp(prob, x0, *args, **kwargs):
     """ Solve an optimization problem using SciPy's SLSQP method. """
-    return _solve_scipy(prob, x0, *args, method='SLSQP', **kwargs)
+
+    fun, cons, jac, bounds = prepare_scipy(prob, *args)
+    return minimize(fun, x0, args=args, method='SLSQP', jac=jac,
+                    bounds=bounds, constraints=cons, **kwargs)
 
 
 def solve_cobyla(prob, x0, *args, **kwargs):
     """ Solve an optimization problem using SciPy's COBYLA method. """
+
     if not all(np.logical_and(prob.ub == oo, prob.lb == -oo)):
         raise ValueError("COBYLA does not support variable lb/ub. Recast as "
                          "constraints.")
     if any(c.type is Equality for c in prob.cons):
         raise ValueError("COBYLA supports only inequality constraints")
-    return _solve_scipy(prob, x0, *args, method='COBYLA', **kwargs)
 
-
-def _solve_scipy(prob, x0, *args, method='SLSQP', **kwargs):
-    fun, cons, jac, bounds = prepare_scipy(prob, *args)
-    return minimize(fun, x0, args=args, jac=jac,
-                    method=method, bounds=bounds,
+    fun, cons, _, _ = prepare_scipy(prob, *args)
+    return minimize(fun, x0, args=args, method='COBYLA',
                     constraints=cons, **kwargs)
+
