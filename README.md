@@ -21,20 +21,20 @@ For example, consider
 where the *p*'s  are parameters defining the upper bounds for each variable. 
 This can be defined by:
 ```python
-    from symopt import OptimizationProblem
-    from sympy import MatrixSymbol, symarray
-
-    x1, x2 = symarray('x', 2)
-    p = MatrixSymbol('p')
-
-    prob = OptimizationProblem(mode='min')
-    prob.add_variable(x1, lb=2, ub=p[0])
-    prob.add_variable(x2, lb=0, ub=p[1])
-    prob.add_parameter(p)
+    >>> from symopt import OptimizationProblem
+    >>> from sympy import MatrixSymbol, symarray
     
-    prob.obj = x1**2/100 + x2**2
-    prob.add_constraints_from([x1 * x2 >= 25,
-                               x1**2 + x2**2 >= 25])
+    >>> x1, x2 = symarray('x', 2)
+    >>> p = MatrixSymbol('p')
+    
+    >>> prob = OptimizationProblem(mode='min')
+    >>> prob.add_variable(x1, lb=2, ub=p[0])
+    >>> prob.add_variable(x2, lb=0, ub=p[1])
+    >>> prob.add_parameter(p)
+    
+    >>> prob.obj = x1**2/100 + x2**2
+    >>> prob.add_constraints_from([x1 * x2 >= 25,
+                                   x1**2 + x2**2 >= 25])
 ```
 That's it. From here, `symopt` will automatically:
 
@@ -45,9 +45,9 @@ function/constraints)
 
 One can then solve the problem for specified parameters using `solve`:
 ```python
-    x = [2, 2]
-    p = [20.0, 50.0]
-    res = prob.solve(x, p, method='ipopt')
+    >>> x = [2, 2]
+    >>> p = [20.0, 50.0]
+    >>> res = prob.solve(x, p, method='ipopt')
 ```
 
 Dependencies
@@ -56,10 +56,8 @@ Dependencies
 * scipy
 * sympy
 * [orderedset](https://pypi.org/project/orderedset/)
-
-If you want to use the Ipopt backend, you will also need
-
-* [cyipopt](https://github.com/matthias-k/cyipopt) (Optional)
+* [cyipopt](https://github.com/matthias-k/cyipopt) (Optional, for optimization using the Ipopt backend)
+* A fortran compiler (Optional, for code generation using `autowrap`)
 
 
 License
