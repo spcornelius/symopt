@@ -12,8 +12,21 @@ tol = 1.0e-8
 wrap_using = ['lambdify', 'autowrap']
 
 
+def needs_ipopt(test_func):
+    def new_test_func(method, wrap_using):
+        if method == 'ipopt' and not config.HAS_IPOPT:
+            pytest.skip(
+                "Test requires optional dependency ipopt, which is not "
+                "installed.")
+        else:
+            return test_func(method, wrap_using)
+
+    return new_test_func
+
+
 @pytest.mark.parametrize("method,wrap_using",
                          product(["ipopt", "slsqp"], wrap_using))
+@needs_ipopt
 def test_prob18(method, wrap_using):
     """ problem 18 from the Hock-Schittkowski test suite """
     if method == "ipopt" and not config.HAS_IPOPT:
@@ -44,6 +57,7 @@ def test_prob18(method, wrap_using):
 
 @pytest.mark.parametrize("method,wrap_using",
                          product(["ipopt", "slsqp"], wrap_using))
+@needs_ipopt
 def test_prob71(method, wrap_using):
     """ problem 71 from the Hock-Schittkowski test suite """
     if method == "ipopt" and not config.HAS_IPOPT:
@@ -77,6 +91,7 @@ def test_prob71(method, wrap_using):
 
 @pytest.mark.parametrize("method,wrap_using",
                          product(["ipopt", "slsqp"], wrap_using))
+@needs_ipopt
 def test_prob64(method, wrap_using):
     """ problem 64 from the Hock-Schittkowski test suite """
     x1, x2, x3 = sym.symarray('x', 3)
@@ -98,6 +113,7 @@ def test_prob64(method, wrap_using):
 
 @pytest.mark.parametrize("method,wrap_using",
                          product(["ipopt", "cobyla", "slsqp"], wrap_using))
+@needs_ipopt
 def test_prob77(method, wrap_using):
     """ problem 77 from the Hock-Schittkowski test suite """
     if method == "ipopt" and not config.HAS_IPOPT:
