@@ -1,8 +1,10 @@
+from itertools import product
+
 import numpy as np
 import pytest
 import sympy as sym
-from itertools import product
 
+import symopt.config as config
 from symopt.problem import OptimizationProblem
 
 tol = 1.0e-8
@@ -14,6 +16,10 @@ wrap_using = ['lambdify', 'autowrap']
                          product(["ipopt", "slsqp"], wrap_using))
 def test_prob18(method, wrap_using):
     """ problem 18 from the Hock-Schittkowski test suite """
+    if method == "ipopt" and not config.HAS_IPOPT:
+        pytest.skip(
+            "Test requires optional dependency ipopt, which is not installed.")
+
     x = sym.MatrixSymbol('x', 2, 1)
     p = sym.Symbol('p')
 
@@ -40,6 +46,9 @@ def test_prob18(method, wrap_using):
                          product(["ipopt", "slsqp"], wrap_using))
 def test_prob71(method, wrap_using):
     """ problem 71 from the Hock-Schittkowski test suite """
+    if method == "ipopt" and not config.HAS_IPOPT:
+        pytest.skip(
+            "Test requires optional dependency ipopt, which is not installed.")
     x = sym.MatrixSymbol('x', 4, 1)
     obj = x[0] * x[3] * (x[0] + x[1] + x[2]) + x[2]
     cons = [x[0] * x[1] * x[2] * x[3] >= 25,
@@ -91,6 +100,9 @@ def test_prob64(method, wrap_using):
                          product(["ipopt", "cobyla", "slsqp"], wrap_using))
 def test_prob77(method, wrap_using):
     """ problem 77 from the Hock-Schittkowski test suite """
+    if method == "ipopt" and not config.HAS_IPOPT:
+        pytest.skip(
+            "Test requires optional dependency ipopt, which is not installed.")
     x1, x2, x3, x4, x5 = sym.symarray('x', 5)
     obj = (x1 - 1) ** 2 + (x1 - x2) ** 2 + (x3 - 1) ** 2 + (x4 - 1) ** 4 + \
           (x5 - 1) ** 6
