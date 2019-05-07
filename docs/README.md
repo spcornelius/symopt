@@ -11,7 +11,8 @@ optimization backends including [SciPy](https://www.scipy.org/) and
 Documentation
 -------------
 Auto-generated API documentation for latest stable release can be found at
-[ReadTheDocs](https://symopt.readthedocs.io/en/stable/).
+https://symopt.readthedocs.io/en/stable/. For the latest development version,
+see https://symopt.readthedocs.io/en/latest/.
 
 Usage
 -----

@@ -26,7 +26,7 @@ def prepare_scipy(prob, *param_vals):
     Returns
     -------
     (`~collections.abc.Callable`, `~collections.abc.Callable`, \
-     `list` of `dict` s, `list` of `tuple` s)
+     `list` of `dict`, `list` of `tuple`)
         Objective function callback, jacobian callback, constraint
         dictionaries, and the lower/upper bound for each variable. See
         documentation for :func:`scipy.optimize.minimize` for more details."""

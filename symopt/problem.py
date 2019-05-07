@@ -81,25 +81,24 @@ class OptimizationProblem(object):
 
     @property
     def vars(self):
-        """ `~orderedset.OrderedSet` of `.Variable` s :
-            Problem parameters. """
+        """ `~orderedset.OrderedSet` of `.Variable` : Problem parameters. """
         return self._vars
 
     @property
     def var_scalars(self):
-        """ `list` of `~sympy.core.symbol.Symbol` s :
+        """ `list` of `~sympy.core.symbol.Symbol` :
              Constituent scalars of all variables in problem. """
         return list(chain.from_iterable(var.as_scalars() for var in self.vars))
 
     @property
     def params(self):
-        """ `~orderedset.OrderedSet` of `.Parameter` s :
+        """ `~orderedset.OrderedSet` of `.Parameter` :
             Problem parameters. """
         return self._params
 
     @property
     def cons(self):
-        """ `~orderedset.OrderedSet` of `.Constraint` s :
+        """ `~orderedset.OrderedSet` of `.Constraint` :
             Problem constraints. """
         return self._cons
 
@@ -111,14 +110,14 @@ class OptimizationProblem(object):
         var : `~sympy.core.symbol.Symbol` or \
               `~sympy.matrices.expressions.MatrixSymbol`
             Symbolic variable to add.
-        lb: `~numbers.Real`, `~sympy.core.expr.Expr`,\
+        lb: `~numbers.Real` , `~sympy.core.expr.Expr` , \
                 or `~collections.abc.Iterable`
             The lower bound(s). If symbolic, should depend only on
             :py:attr:`self.params`. If :py:attr:`symbol` is
             non-scalar, :py:attr:`lb` should be coercible to a
             `~sympy.matrices.immutable.ImmutableDenseMatrix` with the same
             shape. Defaults to `None` (unbounded below).
-        ub: `~numbers.Real`, `~sympy.core.expr.Expr`,\
+        ub: `~numbers.Real` , `~sympy.core.expr.Expr` , \
                 or `~collections.abc.Iterable`
             The upper bound(s). If symbolic, should depend only on
             :py:attr:`self.params`. If :py:attr:`symbol` is
@@ -137,7 +136,7 @@ class OptimizationProblem(object):
                     `~sympy.core.symbol.Symbol` or \
                     `~sympy.matrices.expressions.MatrixSymbol`
             Symbolic variables to add.
-        lb: `~numbers.Real`, `~sympy.core.expr.Expr`,\
+        lb: `~numbers.Real` , `~sympy.core.expr.Expr` , \
                 or `~collections.abc.Iterable`
             The lower bound(s). If symbolic, should depend only on
             :py:attr:`self.params`. If :py:attr:`symbol` is
@@ -146,7 +145,7 @@ class OptimizationProblem(object):
             shape. The value for :py:attr:`lb` is assumed to apply to all
             new variables in :py:attr:`var_bunch`. Defaults to `None` (
             unbounded below).
-        ub: `~numbers.Real`, `~sympy.core.expr.Expr`,\
+        ub: `~numbers.Real` , `~sympy.core.expr.Expr` , \
                 or `~collections.abc.Iterable`
             The upper bound(s). If symbolic, should depend only on
             :py:attr:`self.params`. If :py:attr:`symbol` is

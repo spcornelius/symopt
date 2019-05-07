@@ -22,7 +22,7 @@ sed -i "s/alabaster/sphinx_rtd_theme/g" docs/conf.py
 
 echo "default_role = 'obj'" >> docs/conf.py
 echo "autoclass_content = 'both'" >> docs/conf.py # include both class docstring and __init__
-echo "autodoc_default_flags = ['members', 'show-inheritance']" >> docs/conf.py
+echo "autodoc_default_flags = ['members']" >> docs/conf.py
 echo "autosummary_generate = True" >> docs/conf.py
 echo "numpydoc_class_members_toctree = False" >>docs/conf.py
 echo "numpydoc_attributes_as_param_list = False" >>docs/conf.py

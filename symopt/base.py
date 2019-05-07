@@ -19,7 +19,7 @@ class SymOptExpr(object, metaclass=abc.ABCMeta):
 
         Attributes
         ----------
-        prob: `.OptimizationProblem`
+        prob : `.OptimizationProblem`
             The containing optimization problem.
         """
 
@@ -29,7 +29,7 @@ class SymOptExpr(object, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        prob: `.OptimizationProblem`
+        prob : `.OptimizationProblem`
             The containing optimization problem.
         wrap_using : `str`, either 'lambdify' or 'autowrap'
             Which backend to use for wrapping the
@@ -152,7 +152,7 @@ class SymOptExpr(object, metaclass=abc.ABCMeta):
 class SymOptSymbol(object):
     """ Base class for variables and parameters.
 
-        Wraps a `~sympy.core.symbols.Symbol` or
+        Wraps a `~sympy.core.symbol.Symbol` or
         `~sympy.matrices.expressions.MatrixSymbol`, providing additional
         functionality.
     """
@@ -162,10 +162,10 @@ class SymOptSymbol(object):
 
         Parameters
         ----------
-        symbol: `~sympy.core.symbols.Symbol` or \
+        symbol : `~sympy.core.symbols.Symbol` or \
                     `~sympy.matrices.expressions.MatrixSymbol`
             The symbol representing the variable or parameter.
-        prob: `.OptimizationProblem`
+        prob : `.OptimizationProblem`
             The containing optimization problem.
         """
         self.symbol = sympify(symbol)
@@ -181,6 +181,7 @@ class SymOptSymbol(object):
         return is_scalar(self.symbol)
 
     def as_scalars(self):
+        """ Get a `list` of scalar constituents of this symbol. """
         return as_scalars(self.symbol)
 
     def _sympy_(self):

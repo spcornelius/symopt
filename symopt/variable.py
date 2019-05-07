@@ -20,10 +20,10 @@ class Variable(SymOptSymbol):
 
         Attributes
         ----------
-        lb: `~sympy.core.expr.Expr` or \
+        lb : `~sympy.core.expr.Expr` or \
             `~sympy.matrices.immutable.ImmutableDenseMatrix`
             The variable's lower bound(s).
-        ub: `~sympy.core.expr.Expr` or \
+        ub : `~sympy.core.expr.Expr` or \
             `~sympy.matrices.immutable.ImmutableDenseMatrix`
             The variable's upper bound(s).
         """
@@ -33,19 +33,19 @@ class Variable(SymOptSymbol):
 
         Parameters
         ----------
-        symbol: `~sympy.core.symbols.Symbol` or \
+        symbol : `~sympy.core.symbols.Symbol` or \
                     `~sympy.matrices.expressions.MatrixSymbol`
             The symbol representing the variable.
-        prob: `.OptimizationProblem`
+        prob : `.OptimizationProblem`
             The containing optimization problem.
-        lb: `~numbers.Real`, `~sympy.core.expr.Expr`,\
+        lb : `~numbers.Real` , `~sympy.core.expr.Expr` , \
                 or `~collections.abc.Iterable`
             The lower bound(s). If symbolic, should depend only on
             :py:attr:`prob.params`. If :py:attr:`symbol` is
             non-scalar, :py:attr:`lb` should be coercible to a
             `~sympy.matrices.immutable.ImmutableDenseMatrix` with the same
             shape. Defaults to `None` (unbounded below).
-        ub: `~numbers.Real`, `~sympy.core.expr.Expr`,\
+        ub : `~numbers.Real` , `~sympy.core.expr.Expr` , \
                 or `~collections.abc.Iterable`
             The upper bound(s). If symbolic, should depend only on
             :py:attr:`prob.params`. If :py:attr:`symbol` is
