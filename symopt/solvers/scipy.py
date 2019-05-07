@@ -62,4 +62,3 @@ def solve_cobyla(prob, x0, *args, **kwargs):
     fun, cons, _, _ = prepare_scipy(prob, *args)
     return minimize(fun, x0, args=args, method='COBYLA',
                     constraints=cons, **kwargs)
-
