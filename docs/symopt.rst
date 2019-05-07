@@ -24,6 +24,14 @@ symopt.base module
     :undoc-members:
     :show-inheritance:
 
+symopt.config module
+--------------------
+
+.. automodule:: symopt.config
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 symopt.constraint module
 ------------------------
 

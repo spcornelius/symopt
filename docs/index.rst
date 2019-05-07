@@ -1,5 +1,5 @@
 .. symopt documentation master file, created by
-   sphinx-quickstart on Mon May  6 15:48:57 2019.
+   sphinx-quickstart on Mon May  6 21:18:09 2019.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
