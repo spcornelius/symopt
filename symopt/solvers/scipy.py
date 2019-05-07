@@ -1,6 +1,5 @@
-import numpy as np
 from scipy.optimize import minimize
-from sympy import Equality, oo
+from sympy import Equality
 
 from symopt.util import negated
 
@@ -12,7 +11,7 @@ __all__.extend([
 ])
 
 
-def prepare_scipy(prob, *args):
+def prepare_scipy(prob, *param_vals):
     """ Convert an `.OptimizationProblem` to inputs for\
         :func:`scipy.optimize.minimize`.
 
@@ -20,15 +19,16 @@ def prepare_scipy(prob, *args):
     ----------
     prob : `.OptimizationProblem`
         Problem to solve
-    *args
+    *param_vals
         Numerical values for problem parameters, supplied with the same order
-        and types as ``prob.vars``.
+        and types as :py:attr:`prob.vars`.
 
     Returns
     -------
-    `tuple`
-        Objective function callback, constraint dictionaries, jacobian
-        callback and lower/upper bounds for each variable. See
+    (`~collections.abc.Callable`, `~collections.abc.Callable`, \
+     `list` of `dict` s, `list` of `tuple` s)
+        Objective function callback, jacobian callback, constraint
+        dictionaries, and the lower/upper bound for each variable. See
         documentation for :func:`scipy.optimize.minimize` for more details."""
     fun = prob.obj.cb
     jac = prob.obj.grad_cb
@@ -37,28 +37,29 @@ def prepare_scipy(prob, *args):
         fun = negated(fun)
         jac = negated(jac)
 
-    cons = [c.as_scipy_dict(*args) for c in prob.cons]
-    lb, ub = prob.eval_bounds(*args)
-    return fun, cons, jac, list(zip(lb, ub))
+    cons = [c.as_scipy_dict(*param_vals) for c in prob.cons]
+    lb, ub = prob.eval_bounds(*param_vals)
+    return fun, jac, cons, list(zip(lb, ub))
 
 
-def solve_slsqp(prob, x0, *args, **kwargs):
+def solve_slsqp(prob, x0, *param_vals, **kwargs):
     """ Solve an optimization problem using SciPy's SLSQP method. """
 
-    fun, cons, jac, bounds = prepare_scipy(prob, *args)
-    return minimize(fun, x0, args=args, method='SLSQP', jac=jac,
+    fun, jac, cons, bounds = prepare_scipy(prob, *param_vals)
+    return minimize(fun, x0, args=param_vals, method='SLSQP', jac=jac,
                     bounds=bounds, constraints=cons, **kwargs)
 
 
-def solve_cobyla(prob, x0, *args, **kwargs):
+def solve_cobyla(prob, x0, *param_vals, **kwargs):
     """ Solve an optimization problem using SciPy's COBYLA method. """
 
-    if not all(np.logical_and(prob.ub == oo, prob.lb == -oo)):
+    if any(v.is_bounded for v in prob.vars):
         raise ValueError("COBYLA does not support variable lb/ub. Recast as "
                          "constraints.")
     if any(c.type is Equality for c in prob.cons):
         raise ValueError("COBYLA supports only inequality constraints")
 
-    fun, cons, _, _ = prepare_scipy(prob, *args)
-    return minimize(fun, x0, args=args, method='COBYLA',
+    # COBYLA doesn't use jac or bounds
+    fun, _, cons, _ = prepare_scipy(prob, *param_vals)
+    return minimize(fun, x0, args=param_vals, method='COBYLA',
                     constraints=cons, **kwargs)

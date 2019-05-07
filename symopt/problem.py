@@ -1,11 +1,14 @@
+from itertools import chain
+
 import numpy as np
 from orderedset import OrderedSet
-from sympy import sympify, Symbol, Matrix, MatrixSymbol, SympifyError, oo
+from sympy import sympify
 
-from symopt.constraint import ConstraintCollection
+from symopt.constraint import Constraint
 from symopt.objective import ObjectiveFunction
+from symopt.parameter import Parameter
 from symopt.solvers import solve
-from symopt.util import chain_scalars, depends_only_on
+from symopt.variable import Variable
 
 __all__ = []
 __all__.extend([
@@ -21,63 +24,14 @@ class OptimizationProblem(object):
         including those of the relevant derivatives (objective function
         gradient, constraint gradients, etc.), which are automatically
         derived from the symbolic expressions.
-
-        Attributes
-        ----------
-        obj : `.ObjectiveFunction`
-            The objective function to optimize.
-        vars : `~orderedset.OrderedSet` of `~typing.Union` \
-                [`~sympy.core.symbol.Symbol`,\
-                 `~sympy.matrices.expressions.MatrixSymbol` ]
-            The free variables.
-        params : `~orderedset.OrderedSet` of `~typing.Union` \
-                [`~sympy.core.symbol.Symbol`,\
-                 `~sympy.matrices.expressions.MatrixSymbol` ]
-            The parameters of the objective function and/or constraints.
-        cons : `.ConstraintCollection`
-            The `.Constraint` objects representing the constraints of
-            the problem, after being converted to the form ``expr >= 0``
-            (inequalities) or ``expr == 0`` (equality).
-        lb : `list` of `~sympy.core.expr.Expr`
-            The lower bounds, one for each scalar in :py:attr:`vars`. If
-            symbolic, should depend only on :py:attr:`params`.
-        ub : `list` of `~sympy.core.expr.Expr`
-            The upper bounds, one for each scalar in :py:attr:`vars`. If
-            symbolic, should depend only on :py:attr:`params`.
-        mode : `str`, either 'max' or 'min'
-            Whether the problem is a minimization or maximization problem.
         """
 
-    def __init__(self, obj, vars, lb=None, ub=None,
-                 cons=None, params=None, mode="min",
-                 wrap_using='lambdify', simplify=True):
+    def __init__(self, mode='min', wrap_using='lambdify', simplify=True):
         """ Optimization problem with symbolic objective function, constraints,
             and/or parameters.
 
             Parameters
             ----------
-            obj : `~sympy.core.expr.Expr`
-                The objective function to optimize. Can depend on
-                :py:attr:`vars` and also :py:attr:`params`.
-            vars : `~collections.abc.Iterable` of `~typing.Union` \
-                    [`~sympy.core.symbol.Symbol`,\
-                     `~sympy.matrices.expressions.MatrixSymbol` ]
-                The free variables.
-            params : `~collections.abc.Iterable` of `~typing.Union` \
-                    [`~sympy.core.symbol.Symbol`,\
-                     `~sympy.matrices.expressions.MatrixSymbol` ]
-                The parameters of the objective function and/or constraints.
-            cons : `list` of :class:`~sympy.core.relational.Relational`
-                The constraints. Can depend on both :py:attr:`vars` and
-                :py:attr:`params`.
-            lb : `~collections.abc.Iterable` of `~typing.Union` \
-                [ `~numbers.Real` , `~sympy.core.expr.Expr` ]
-                The lower bounds, one for each scalar in :py:attr:`vars`. If
-                symbolic, should depend only on :py:attr:`params`.
-            ub : `~collections.abc.Iterable` of `~typing.Union` \
-                [ `~numbers.Real` , `~sympy.core.expr.Expr` ]
-                The upper bounds, one for each scalar in :py:attr:`vars`. If
-                symbolic, should depend only on :py:attr:`params`.
             mode : `str`, either 'max' or 'min'
                 Whether the objective function should be minimized or
                 maximized (default 'min').
@@ -91,108 +45,238 @@ class OptimizationProblem(object):
                 If `True`, simplify all symbolic expressions before wrapping
                 as functions. Defaults to `True`.
         """
-        self.mode = str(mode).lower()
-        wrap_using = str(wrap_using).lower()
-        if mode not in ["min", "max"]:
-            raise ValueError(
-                "Optimization mode must be one of ['min', 'max'].")
-        self._process_vars(vars)
-        self._process_params(params)
-        self._process_bounds(lb, ub)
-        self.obj = ObjectiveFunction(obj, self.vars, self.params,
-                                     wrap_using=wrap_using, simplify=simplify)
-        self.cons = ConstraintCollection(cons, self.vars, self.params,
-                                         wrap_using=wrap_using,
-                                         simplify=simplify)
+        self.mode = mode
+        self._obj = None
+        self.simplify = simplify
+        self.wrap_using = wrap_using
+        self._vars = OrderedSet()
+        self._params = OrderedSet()
+        self._cons = OrderedSet()
 
-    def _process_vars(self, vars):
-        if vars is None:
-            vars = []
-        try:
-            vars = [sympify(v) for v in vars]
-        except (AttributeError, SympifyError):
-            raise TypeError("Couldn't sympify variable list.")
-        for v in vars:
-            if not isinstance(v, (Symbol, MatrixSymbol)):
-                raise TypeError(
-                    f"Variable {v} is not a Symbol nor MatrixSymbol.")
-        self.vars = OrderedSet(vars)
+    @property
+    def mode(self):
+        """ `str` : either 'max' or 'min', depending on whether the problem is
+                    a minimization or maximization problem. """
+        return self._mode
 
-    def _process_params(self, params):
-        if params is None:
-            params = []
-        try:
-            params = [sympify(p) for p in params]
-        except (AttributeError, SympifyError):
-            raise TypeError("Couldn't sympify parameter list.")
-        for p in params:
-            if not isinstance(p, (Symbol, MatrixSymbol)):
-                raise TypeError(
-                    f"Parameter {p} is not a Symbol nor MatrixSymbol.")
-        self.params = OrderedSet(params)
+    @mode.setter
+    def mode(self, new_mode):
+        new_mode = str(new_mode).lower()
+        if new_mode not in ['min', 'max']:
+            raise ValueError(f"{new_mode} is not a valid optimization mode.")
+        self._mode = new_mode
 
-    def _process_bounds(self, lb, ub):
-        scalar_vars = list(chain_scalars(self.vars))
-        n = len(scalar_vars)
-        if lb is None:
-            lb = [-oo for _ in range(n)]
-        if ub is None:
-            ub = [oo for _ in range(n)]
-        try:
-            lb = [sympify(expr) for expr in lb]
-            ub = [sympify(expr) for expr in ub]
-        except (AttributeError, TypeError, SympifyError):
-            raise TypeError("Could not convert bounds to a lists of "
-                            "sympy expressions.")
-        if len(lb) != n or len(ub) != n:
-            raise ValueError(
-                f"Bounds must have the same length ({n}) as number of "
-                f"scalar variables.")
+    @property
+    def obj(self):
+        """ `.ObjectiveFunction` : Problem objective function. """
+        return self._obj
 
-        for expr in lb:
-            if not depends_only_on(expr, self.params):
-                raise ValueError(
-                    f"Lower bound {expr} may only depend on declared params.")
-        for expr in ub:
-            if not depends_only_on(expr, self.params):
-                raise ValueError(
-                    f"Upper bound {expr} may only depend on declared params.")
-        self.lb = np.array(lb, dtype='object')
-        self.ub = np.array(ub, dtype='object')
+    @obj.setter
+    def obj(self, new_obj):
+        if new_obj is not None:
+            new_obj = ObjectiveFunction(new_obj, self,
+                                        wrap_using=self.wrap_using,
+                                        simplify=self.simplify)
+        self._obj = new_obj
 
-    def _fill_in_params(self, expr, *param_vals):
-        subs = {p: Matrix(v) if isinstance(p, MatrixSymbol) else v for
-                p, v in zip(self.params, param_vals)}
-        return expr.subs(subs)
+    @property
+    def vars(self):
+        """ `~orderedset.OrderedSet` of `.Variable` s :
+            Problem parameters. """
+        return self._vars
+
+    @property
+    def var_scalars(self):
+        """ `list` of `~sympy.core.symbol.Symbol` s :
+             Constituent scalars of all variables in problem. """
+        return list(chain.from_iterable(var.as_scalars() for var in self.vars))
+
+    @property
+    def params(self):
+        """ `~orderedset.OrderedSet` of `.Parameter` s :
+            Problem parameters. """
+        return self._params
+
+    @property
+    def cons(self):
+        """ `~orderedset.OrderedSet` of `.Constraint` s :
+            Problem constraints. """
+        return self._cons
+
+    def add_variable(self, var, lb=None, ub=None):
+        """" Add a symbolic variable to the problem.
+
+        Parameters
+        ----------
+        var : `~sympy.core.symbol.Symbol` or \
+              `~sympy.matrices.expressions.MatrixSymbol`
+            Symbolic variable to add.
+        lb: `~numbers.Real`, `~sympy.core.expr.Expr`,\
+                or `~collections.abc.Iterable`
+            The lower bound(s). If symbolic, should depend only on
+            :py:attr:`self.params`. If :py:attr:`symbol` is
+            non-scalar, :py:attr:`lb` should be coercible to a
+            `~sympy.matrices.immutable.ImmutableDenseMatrix` with the same
+            shape. Defaults to `None` (unbounded below).
+        ub: `~numbers.Real`, `~sympy.core.expr.Expr`,\
+                or `~collections.abc.Iterable`
+            The upper bound(s). If symbolic, should depend only on
+            :py:attr:`self.params`. If :py:attr:`symbol` is
+            non-scalar, :py:attr:`lb` should be coercible to a
+            `~sympy.matrices.immutable.ImmutableDenseMatrix` with the same
+            shape. Defaults to `None` (unbounded above).
+        """
+        self._vars.add(Variable(var, self, lb=lb, ub=ub))
+
+    def add_variables_from(self, var_bunch, lb=None, ub=None):
+        """" Add multiple new symbolic variables to the problem.
+
+        Parameters
+        ----------
+        var_bunch : `~collections.abc.Iterable of \
+                    `~sympy.core.symbol.Symbol` or \
+                    `~sympy.matrices.expressions.MatrixSymbol`
+            Symbolic variables to add.
+        lb: `~numbers.Real`, `~sympy.core.expr.Expr`,\
+                or `~collections.abc.Iterable`
+            The lower bound(s). If symbolic, should depend only on
+            :py:attr:`self.params`. If :py:attr:`symbol` is
+            non-scalar, :py:attr:`lb` should be coercible to a
+            `~sympy.matrices.immutable.ImmutableDenseMatrix` with the same
+            shape. The value for :py:attr:`lb` is assumed to apply to all
+            new variables in :py:attr:`var_bunch`. Defaults to `None` (
+            unbounded below).
+        ub: `~numbers.Real`, `~sympy.core.expr.Expr`,\
+                or `~collections.abc.Iterable`
+            The upper bound(s). If symbolic, should depend only on
+            :py:attr:`self.params`. If :py:attr:`symbol` is
+            non-scalar, :py:attr:`lb` should be coercible to a
+            `~sympy.matrices.immutable.ImmutableDenseMatrix` with the same
+            shape. he value for :py:attr:`ub` is assumed to apply to all
+            new variables in :py:attr:`var_bunch`.
+            Defaults to `None` (unbounded above).
+        """
+        for var in var_bunch:
+            self.add_variable(var, lb=lb, ub=ub)
+
+    def add_constraint(self, con):
+        """ Add a new symbolic constraint to the problem.
+
+        Parameters
+        ----------
+        con : `~sympy.core.relational.Relational`
+            The new constraint, as a :mod:`sympy` (in)equalities in terms of
+            :py:attr:`prob.vars` and :py:attr:`prob.params`. Note:
+            `~sympy.core.relational.Eq` (not ``==``) should be used to define
+            equality constraints.
+        """
+        self._cons.add(Constraint(con, self, wrap_using=self.wrap_using,
+                                  simplify=self.simplify))
+
+    def add_constraints_from(self, con_bunch):
+        """ Add multiple new symbolic constraints to the problem.
+
+        Parameters
+        ----------
+        con_bunch : `~collections.abc.Iterable` of \
+                    `~sympy.core.relational.Relational`
+            The new constraints, as :mod:`sympy` (in)equalities in terms of
+            :py:attr:`prob.vars` and :py:attr:`prob.params`. Note:
+            `~sympy.core.relational.Eq` (not ``==``) should be used to define
+            equality constraints.
+        """
+        for con in con_bunch:
+            self.add_constraint(con)
+
+    def add_parameter(self, param):
+        """ Add a new symbolic parameter to the problem.
+
+        Parameters
+        ----------
+        param : `~sympy.core.symbol.Symbol` or \
+                `~sympy.matrices.expressions.MatrixSymbol`
+            Symbolic parameter to add.
+        """
+        self._params.add(Parameter(param, self))
+
+    def add_parameters_from(self, param_bunch):
+        """ Add multiple new symbolic parameter to the problem.
+
+        Parameters
+        ----------
+        param_bunch : `~collections.abc.Iterable` of \
+                      `~sympy.core.symbol.Symbol` or \
+                      `~sympy.matrices.expressions.MatrixSymbol`
+            Symbolic parameter to add.
+        """
+        for param in param_bunch:
+            self.add_parameter(param)
 
     def eval_bounds(self, *param_vals):
-        """ Evaluate parametric bounds at specified parameter values.
+        """ Evaluate lower/upper variable bounds the problem at specified
+            parameter values as flattened arrays.
 
         Parameters
         ----------
         *param_vals
-            Params at which to numerically evaluate problem bounds. Should
-            be provided in same the same order as :py:attr:`self.params`.
+            Numeric values for :py:attr:`self.params`. Should be either
+            `~numbers.Real`, or `array_like` depending on whether the
+            parameter is scalar or not.
 
         Returns
         -------
-        (`numpy.ndarray`, `numpy.ndarray`)
-            Arrays giving the the lower/upper bounds for each scalar variable
-            in the problem, in sequence."""
-        lb = np.asarray(
-            self._fill_in_params(Matrix(self.lb), *param_vals).evalf())
-        ub = np.asarray(
-            self._fill_in_params(Matrix(self.ub), *param_vals).evalf())
-        return lb.squeeze(), ub.squeeze()
+        (`~numpy.ndarray`, `~numpy.ndarray`)
+            Arrays corresponding to the lower/upper bounds for each scalar
+            variable in :py:attr:`self.var_scalars`.
+        """
+        bounds = [v.eval_bounds(*param_vals) for v in self.vars]
+        lb, ub = tuple(zip(*bounds))
+        lb = np.hstack(
+            tuple(np.atleast_1d(_lb).flatten().astype('float') for _lb in lb))
+        ub = np.hstack(
+            tuple(np.atleast_1d(_ub).flatten().astype('float') for _ub in ub))
+        return lb, ub
 
-    def solve(self, x0, *args, method='cyipopt', **kwargs):
+    def depends_only_on_params_or_vars(self, expr):
+        """ Test if expr depends only problem variables and/or parameters
+
+        Parameters
+        ----------
+        expr : `~sympy.core.expr.Expr`
+            SymPy expression to evaluate.
+
+        Returns
+        -------
+        `bool`
+            `True` if the free symbols in :py:attr:`expr` are contained in \
+            :py:attr:`self.params` and :py:attr:`self.vars`, `False` otherwise.
+        """
+        return sympify(expr).free_symbols <= self.params | self.vars
+
+    def depends_only_on_params(self, expr):
+        """ Test if expr depends only problem parameters
+
+        Parameters
+        ----------
+        expr : `~sympy.core.expr.Expr`
+            SymPy expression to evaluate.
+
+        Returns
+        -------
+        `bool`
+            `True` if the free symbols in :py:attr:`expr` are contained in \
+            :py:attr:`self.params`, `False` otherwise.
+        """
+        return sympify(expr).free_symbols <= self.params
+
+    def solve(self, x0, *param_vals, method='cyipopt', **kwargs):
         """ Solve optimization problem for particular parameter values.
 
         Parameters
         ----------
-        x0 : `numpy.ndarray`
+        x0 : `array_like`
             The initial guess for the optimizer.
-        *args
+        *param_vals
             The parameter values to use, defined in the same order (and
             with the same shapes as in :py:attr:`self.params`). Should be
             `~numbers.Real` scalars or `~sympy.matrices.matrices.MatrixBase`
@@ -211,7 +295,11 @@ class OptimizationProblem(object):
             Solution dictionary. See :func:`scipy.optimize.minimize`
             for details.
         """
+        if not vars or self.obj is None:
+            raise ValueError(
+                "Can't solve OptimizationProblem without variables and an "
+                "objective function.")
         try:
-            return solve[method](self, x0, *args, **kwargs)
+            return solve[method](self, x0, *param_vals, **kwargs)
         except KeyError:
             raise ValueError(f"Unknown optimization method '{method}'.")

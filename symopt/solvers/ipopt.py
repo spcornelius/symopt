@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.optimize import OptimizeResult
 from sympy import GreaterThan, StrictGreaterThan, LessThan, StrictLessThan
-
 import symopt.config as config
 
 __all__ = []
@@ -13,7 +12,8 @@ __all__.extend([
 INF = 10.0 ** 19
 
 
-def solve_ipopt(prob, x0, *args, **kwargs):
+# noinspection PyPackageRequirements
+def solve_ipopt(prob, x0, *param_vals, **kwargs):
     """ Solve a given `.OptimizationProblem` using Ipopt. """
     if config.HAS_IPOPT:
         from ipopt import problem
@@ -27,7 +27,11 @@ def solve_ipopt(prob, x0, *args, **kwargs):
     kwargs['nlp_scaling_method'] = 'user-scaling'
     n = len(x0)
     m = len(prob.cons)
-    lb, ub = prob.eval_bounds(*args)
+
+    # (scalarized) variable bounds
+    lb, ub = prob.eval_bounds(*param_vals)
+
+    # constraint bounds
     cl = [-INF if c.type in (LessThan, StrictLessThan) else 0 for
           c in prob.cons]
     cu = [INF if c.type in (GreaterThan, StrictGreaterThan) else 0 for c in
@@ -42,29 +46,34 @@ def solve_ipopt(prob, x0, *args, **kwargs):
             self.njev = 0
             self.nit = 0
 
-        def objective(self, x):
+        def objective(self, y):
             self.nfev += 1
-            return prob.obj.cb(x, *args)
+            return prob.obj.cb(y, *param_vals)
 
-        def constraints(self, x):
-            return [c.cb(x, *args) for c in prob.cons]
+        @staticmethod
+        def constraints(y):
+            return [c.cb(y, *param_vals) for c in prob.cons]
 
-        def gradient(self, x):
+        def gradient(self, y):
             self.njev += 1
-            return prob.obj.grad_cb(x, *args)
+            return prob.obj.grad_cb(y, *param_vals)
 
-        def jacobian(self, x):
-            return np.hstack([c.grad_cb(x, *args) for c in prob.cons])
+        @staticmethod
+        def jacobian(y):
+            return np.hstack([c.grad_cb(y, *param_vals) for c in prob.cons])
 
-        def hessian(self, x, lam, obj):
-            res = obj * prob.obj.hess_cb(x, *args)
+        @staticmethod
+        def hessian(y, lam, obj):
+            res = obj * prob.obj.hess_cb(y, *param_vals)
             for L, c in zip(lam, prob.cons):
-                res += L * c.hess_cb(x, *args)
+                res += L * c.hess_cb(y, *param_vals)
             return res[idx]
 
-        def hessianstructure(self):
+        @staticmethod
+        def hessianstructure():
             return idx
 
+        # noinspection PyUnusedLocal
         def intermediate(self, alg_mod, iter_count, obj_value, inf_pr, inf_du,
                          mu, d_norm, regularization_size, alpha_du, alpha_pr,
                          ls_trials):

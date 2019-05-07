@@ -1,139 +1,76 @@
-from collections.abc import Sequence
-
 from sympy import sympify, Unequality, SympifyError, Equality, LessThan, \
     StrictLessThan
 from sympy.core.relational import Relational
 
-from symopt.base import SymOptBase
+from symopt.base import SymOptExpr
 from symopt.util import negated
 
-
-class ConstraintCollection(Sequence):
-    """ A collection of optimization constraints.
-
-        Effectively just a list of `~.Constraint` objects. However, this
-        wrapper provides some convenient functions that operate on
-        an optimization problem's constraint set as a whole.
-        """
-
-    def __init__(self, cons, vars, params, wrap_using='lambdify',
-                 simplify=True):
-        """ A collection of optimization constraints.
-
-        Effectively just a list of `~.Constraint` objects. However, this
-        wrapper provides some convenient functions that operate on
-        an optimization problem's constraint set as a whole.
-
-        Parameters
-        ----------
-        cons : `~collections.abc.Iterable` of \
-                `~sympy.core.relational.Relational`
-            The constraints, in terms of :py:attr:`vars` and :py:attr:`params`.
-        vars : `~collections.abc.Sequence` of `~typing.Union` \
-                 [ `~sympy.core.symbol.Symbol`,\
-                  `~sympy.matrices.expressions.MatrixSymbol` ]
-            The symbolic variables.
-        params : `~collections.abc.Sequence` of `~typing.Union` \
-                 [ `~sympy.core.symbol.Symbol`,\
-                  `~sympy.matrices.expressions.MatrixSymbol` ]
-            The symbolic parameters.
-        wrap_using : `str`, either 'lambdify' or 'autowrap'
-            Which backend to use for wrapping the
-            constraints and their derivatives for numerical
-            evaluation. See :func:`~sympy.utilities.lambdify.lambdify` and
-            :func:`~sympy.utilities.autowrap.autowrap` for more details.
-            Defaults to 'lambdify'.
-        simplify : `bool`
-            If `True`, simplify constraints and their derivatives
-            before wrapping as functions. Defaults to `True`.
-        """
-        self._cons = [Constraint(c, vars, params, wrap_using=wrap_using,
-                                 simplify=simplify) for c
-                      in cons]
-
-    def __iter__(self):
-        yield from self._cons
-
-    def __contains__(self, x):
-        return x in self._cons
-
-    def __len__(self):
-        return len(self._cons)
-
-    def __getitem__(self, x):
-        return self._cons[x]
-
-    def __reversed__(self):
-        yield from reversed(self._cons)
-
-    def __str__(self):
-        return str(self._cons)
-
-    def all_linear(self):
-        """ True if all Constraints in this collection are linear in their
-            variables, False otherwise. """
-        return all(c.is_linear() for c in self)
-
-    def all_quadratic(self):
-        """ True if all Constraints in this collection are at most quadratic
-            in their variables, False otherwise. """
-        return all(c.is_quadratic() for c in self)
+__all__ = []
+__all__.extend([
+    'Constraint'
+])
 
 
-class Constraint(SymOptBase):
+class Constraint(SymOptExpr):
     """ Symbolic (non)linear optimization constraint. """
 
-    def __init__(self, con, vars, params, wrap_using='lambdify',
-                 simplify=True):
+    def __init__(self, rel, prob, **kwargs):
         """ Symbolic (non)linear optimization constraint.
 
         Parameters
         ----------
-        con : `~sympy.core.relational.Relational`
-            The constraint, in terms of :py:attr:`vars` and :py:attr:`params`.
-        vars : `~collections.abc.Sequence` of `~typing.Union` \
-                 [ `~sympy.core.symbol.Symbol`,\
-                  `~sympy.matrices.expressions.MatrixSymbol` ]
-            The symbolic variables.
-        params : `~collections.abc.Sequence` of `~typing.Union` \
-                 [ `~sympy.core.symbol.Symbol`,\
-                  `~sympy.matrices.expressions.MatrixSymbol` ]
-            The symbolic parameters.
-        wrap_using : `str`, either 'lambdify' or 'autowrap'
-            Which backend to use for wrapping the
-            constraint and its derivatives for numerical
-            evaluation. See :func:`~sympy.utilities.lambdify.lambdify` and
-            :func:`~sympy.utilities.autowrap.autowrap` for more details.
-            Defaults to 'lambdify'.
-        simplify : `bool`
-            If `True`, simplify constraint and its derivatives
-            before wrapping as functions. Defaults to `True`.
+        rel : `~sympy.core.relational.Relational`
+            The constraint in terms of :py:attr:`prob.vars` and
+            :py:attr:`prob.params`. Note:  `~sympy.core.relational.Eq`
+            (not ``==``) should be used to define equality constraints.
+        prob : `.OptimizationProblem`
+            The containing optimization problem.
+        **kwargs
+            Keyword args to pass to `.SymOptBase`.
         """
-        try:
-            con = sympify(con)
-        except (AttributeError, SympifyError):
-            raise TypeError(f"Couldn't sympify constraint {con}.")
 
-        if not isinstance(con, Relational):
+        try:
+            rel = sympify(rel)
+        except (AttributeError, SympifyError):
+            raise TypeError(f"Couldn't sympify constraint {rel}.")
+
+        if not isinstance(rel, Relational):
             raise TypeError(
-                f"Constraint expression {con} is not of type Relational.")
-        if isinstance(con, Unequality):
+                f"Constraint expression {rel} is not of type Relational.")
+        if isinstance(rel, Unequality):
             raise TypeError(
-                f"Constraint expression {con} of type Unequality does not "
+                f"Constraint expression {rel} of type Unequality does not "
                 f"make sense.")
 
-        self._con = con.__class__(con.lhs - con.rhs, 0)
-        super().__init__(self._con.lhs, vars, params, wrap_using=wrap_using,
-                         simplify=simplify)
+        self.rel = rel.__class__(rel.lhs - rel.rhs, 0)
+        super().__init__(prob, **kwargs)
 
-    def __str__(self):
-        return str(self._con)
+    def __repr__(self):
+        return f"Constraint('{self.rel}')"
+
+    @property
+    def expr(self):
+        return self.rel.lhs
+
+    @property
+    def sympified(self):
+        return self.rel
+
+    @property
+    def lhs(self):
+        """ The left hand side of the constraint (should always be 0). """
+        return self.rel.lhs
+
+    @property
+    def rhs(self):
+        """ The right hand side of the constraint (should always be 0). """
+        return self.rel.rhs
 
     @property
     def type(self):
         """ The type (a subclass of of `sympy.core.relational.Relational` )
             of this constraint (greater than, less than, equality, etc.)."""
-        return self._con.__class__
+        return self.rel.__class__
 
     def as_scipy_dict(self, *args):
         """ Represent the constraint as a dictionary for use with \

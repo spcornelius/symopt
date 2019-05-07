@@ -1,114 +1,196 @@
 import sympy as sym
+import abc
+from sympy import lambdify, sympify, Symbol, MatrixSymbol
 from sympy.utilities.autowrap import autowrap
-from sympy import lambdify
 
-from symopt.util import chain_scalars, squeezed, is_linear, is_quadratic, \
-    depends_only_on, reshape_args
+from symopt.util import is_linear, is_quadratic, reshape_args, squeezed, \
+    is_scalar, as_scalars
+
+__all__ = []
+__all__.extend([
+    'SymOptSymbol',
+    'SymOptExpr'
+])
 
 
-class SymOptBase(object):
+class SymOptExpr(object, metaclass=abc.ABCMeta):
     """ Base class for symbolic expression with automatic derivatives
         and function wrapping.
 
         Attributes
         ----------
-        expr : `~sympy.core.expr.Expr`
-            Relevant symbolic expression in a child class, i.e. the thing
-            that should have derivatives/function wrapping.
-        vars : `~collections.abc.Sequence` of `~typing.Union` \
-                [`~sympy.core.symbol.Symbol`,\
-                 `~sympy.matrices.expressions.MatrixSymbol` ]
-            Symbolic variables.
-        params : `~collections.abc.Sequence` of `~typing.Union` \
-                [`~sympy.core.symbol.Symbol`,\
-                 `~sympy.matrices.expressions.MatrixSymbol` ]
-            Symbolic parameters.
-        grad : `~sympy.matrices.immutable.ImmutableDenseMatrix`
-            Derivatives of :py:attr:`expr` with respect to \
-            :py:attr:`vars`.
-        hess : `~sympy.matrices.immutable.ImmutableDenseMatrix`
-            Second derivatives of :py:attr:`expr` with respect to \
-            :py:attr:`vars`.
-        cb : `~collections.abc.Callable`
-            Function to numerically evaluate :py:attr:`expr`. Has signature
-            ``cb(*vars, *params) -->`` `float`.
-        grad_cb : `~collections.abc.Callable`
-            Function to numerically evaluate :py:attr:`grad`. Has signature
-            ``grad_cb(*vars, *params) -->`` 1D `numpy.ndarray`.
-        hess_cb : `~collections.abc.Callable`
-            Function to numerically evaluate :py:attr:`hess`. Has signature
-            ``hess_cb(*vars, *params) -->`` 2D `numpy.ndarray`.
+        prob: `.OptimizationProblem`
+            The containing optimization problem.
         """
 
-    def __init__(self, expr, vars, params, wrap_using='autowrap',
-                 simplify=True):
+    def __init__(self, prob, wrap_using='autowrap', simplify=True):
         """ Base class for symbolic expression with automatic derivatives
         and function wrapping.
 
         Parameters
         ----------
-        expr : `~sympy.core.expr.Expr`
-            Relevant symbolic expression, as specified by a child class.
-            I.e. the thing that should have derivatives/function wrapping.
-        vars : `~collections.abc.Sequence` of `~typing.Union` \
-                [`~sympy.core.symbol.Symbol`,\
-                 `~sympy.matrices.expressions.MatrixSymbol` ]
-            Symbolic variables. Note: not all :py:attr:`vars` need appear in
-            :py:attr:`expr`; they merely define over what to take derivatives
-            of :py:attr:`expr`, and the signature of the functions to
-            numerically evaluate it and its derivatives.
-        params : `~collections.abc.Sequence` of `~typing.Union` \
-                [`~sympy.core.symbol.Symbol`,\
-                 `~sympy.matrices.expressions.MatrixSymbol` ]
-            Parameters appearing in :py:attr:`expr`. Note: not all \
-            :py:attr:`params` need appear in :py:attr:`expr`.
+        prob: `.OptimizationProblem`
+            The containing optimization problem.
+        wrap_using : `str`, either 'lambdify' or 'autowrap'
+            Which backend to use for wrapping the
+            constraint and its derivatives for numerical
+            evaluation. See :func:`~sympy.utilities.lambdify.lambdify` and
+            :func:`~sympy.utilities.autowrap.autowrap` for more details.
+            Defaults to 'lambdify'.
         simplify : `bool`
-            If `True`, simplify :py:attr:`expr` and its derivatives
+            If `True`, simplify constraint and its derivatives
             before wrapping as functions. Defaults to `True`.
-        """
 
-        try:
-            expr = sym.sympify(expr)
-        except sym.SympifyError:
-            raise TypeError(f"Couldn't sympify expression '{expr}.")
-        params_and_vars = set(params) | set(vars)
-        if not depends_only_on(expr, params_and_vars):
+        """
+        self.prob = prob
+        if not prob.depends_only_on_params_or_vars(self.expr):
             raise ValueError(
-                f"Expression '{expr}' can depend only on "
-                f"declared vars and params.")
-        self.expr = expr
-        self.vars = vars
-        self.params = params
+                f"Expression '{self.expr}' can depend only on "
+                f"problem variables and parameters.")
+        self._grad = None
+        self._hess = None
+        self._cb = None
+        self._grad_cb = None
+        self._hess_cb = None
+        self.simplify = simplify
         self.wrap_using = str(wrap_using).lower()
 
-        scalar_vars = list(chain_scalars(vars))
-        self.grad = sym.ImmutableMatrix([expr.diff(s) for s in scalar_vars])
-        self.hess = sym.ImmutableMatrix(self.grad.jacobian(scalar_vars))
+    def _wrap(self, expr):
+        vars = self.prob.var_scalars
+        x = sym.MatrixSymbol('x', len(vars), 1)
+        subs = dict(zip(vars, sym.flatten(x)))
+        expr = expr.subs(subs)
+        args = (x,) + tuple(p.symbol for p in self.prob.params)
+        if self.simplify:
+            expr = expr.simplify()
+        if self.wrap_using == 'autowrap':
+            return autowrap(expr, args=args)
+        else:
+            return reshape_args(lambdify(args, expr),
+                                args)
 
-        x = sym.MatrixSymbol('x', len(scalar_vars), 1)
-        subs = dict(zip(scalar_vars, sym.flatten(x)))
-        args = (x,) + tuple(self.params)
+    @property
+    @abc.abstractmethod
+    def expr(self):
+        """ The symbolic expression (and its derivatives) that should be \
+            wrapped in functions. """
 
-        def _wrap(_expr):
-            _expr = _expr.subs(subs)
-            if simplify:
-                _expr = _expr.simplify()
-            if self.wrap_using == 'autowrap':
-                return autowrap(_expr, args=args)
-            else:
-                return reshape_args(lambdify(args, _expr),
-                                    args)
+    @property
+    @abc.abstractmethod
+    def sympified(self):
+        """ Attribute to return upon calls to \
+            :func:`~sympy.core.sympify.sympify` applied to this object."""
 
-        self.cb = _wrap(self.expr)
-        self.grad_cb = squeezed(_wrap(self.grad))
-        self.hess_cb = squeezed(_wrap(self.hess))
+    def _sympy_(self):
+        return self.sympified
+
+    def __eq__(self, other):
+        return sympify(self).equals(other)
+
+    def __ne__(self, other):
+        return not sympify(self).equals(other)
+
+    def __str__(self):
+        return str(sympify(self))
+
+    def __hash__(self):
+        # Can't do hash(sympify(self)) due to infinite recursion
+        return hash(self.sympified)
+
+    @property
+    def grad(self):
+        """ `~sympy.matrices.immutable.ImmutableDenseMatrix` : \
+             First derivatives of :py:attr:`expr` with respect to \
+             :py:attr:`prob.vars`. """
+        if self._grad is None:
+            self._grad = sym.ImmutableMatrix(
+                [self.expr.diff(s) for s in self.prob.var_scalars])
+        return self._grad
+
+    @property
+    def hess(self):
+        """ `~sympy.matrices.immutable.ImmutableDenseMatrix` : \
+             Second derivatives of :py:attr:`expr` with respect to \
+             :py:attr:`prob.vars`. """
+        if self._hess is None:
+            self._hess = sym.ImmutableMatrix(
+                self.grad.jacobian(self.prob.var_scalars))
+        return self._hess
+
+    def cb(self, x, *params):
+        """ Callback for numerically evaluating :py:attr:`self.expr`. """
+        if self._cb is None:
+            self._cb = self._wrap(self.expr)
+
+        return self._cb(x, *params)
+
+    def grad_cb(self, x, *params):
+        """ Callback for numerically evaluating :py:attr:`self.grad`. """
+        if self._grad_cb is None:
+            self._grad_cb = squeezed(self._wrap(self.grad))
+
+        return self._grad_cb(x, *params)
+
+    def hess_cb(self, x, *params):
+        """ Callback for numerically evaluating :py:attr:`self.hess`. """
+        if self._hess_cb is None:
+            self._hess_cb = squeezed(self._wrap(self.hess))
+
+        return self._hess_cb(x, *params)
 
     def is_linear(self):
         """ Return `True` if :py:attr:`self.expr` is linear in
             :py:attr:`self.vars`, `False` otherwise."""
-        return is_linear(self.expr, self.vars)
+        return is_linear(self.expr, self.prob.vars)
 
     def is_quadratic(self):
         """ Return `True` if :py:attr:`self.expr` is at most quadratic
             in :py:attr:`self.vars`, `False` otherwise."""
-        return is_quadratic(self.expr, self.vars)
+        return is_quadratic(self.expr, self.prob.vars)
+
+
+class SymOptSymbol(object):
+    """ Base class for variables and parameters.
+
+        Wraps a `~sympy.core.symbols.Symbol` or
+        `~sympy.matrices.expressions.MatrixSymbol`, providing additional
+        functionality.
+    """
+
+    def __init__(self, symbol, prob):
+        """ Base class for variables and parameters.
+
+        Parameters
+        ----------
+        symbol: `~sympy.core.symbols.Symbol` or \
+                    `~sympy.matrices.expressions.MatrixSymbol`
+            The symbol representing the variable or parameter.
+        prob: `.OptimizationProblem`
+            The containing optimization problem.
+        """
+        self.symbol = sympify(symbol)
+        self.prob = prob
+        if not isinstance(self.symbol, (Symbol, MatrixSymbol)):
+            raise TypeError(
+                f"Could not convert {symbol} to a Symbol or MatrixSymbol.")
+
+    @property
+    def is_scalar(self):
+        """`bool`: `True` if :py:attr:`self` represents a scalar symbol,
+                   `False` otherwise. """
+        return is_scalar(self.symbol)
+
+    def as_scalars(self):
+        return as_scalars(self.symbol)
+
+    def _sympy_(self):
+        return self.symbol
+
+    def __hash__(self):
+        return hash(self.symbol)
+
+    def __eq__(self, other):
+        return self.symbol.equals(other)
+
+    def __ne__(self, other):
+        return not self.symbol.equals(other)

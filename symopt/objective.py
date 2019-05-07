@@ -1,38 +1,33 @@
-from symopt.base import SymOptBase
+from symopt.base import SymOptExpr
+import sympy as sym
 
 
-class ObjectiveFunction(SymOptBase):
+class ObjectiveFunction(SymOptExpr):
     """ Symbolic (non)linear optimization objective function. """
 
-    def __init__(self, expr, vars, params, wrap_using='lambdify',
-                 simplify=True):
+    def __init__(self, obj, prob, **kwargs):
         """ Symbolic (non)linear optimization objective function.
 
         Parameters
         ----------
-        con : `~sympy.core.expr.Expr`
-            The objective function, in terms of :py:attr:`vars` and
-            :py:attr:`params`.
-        vars : `~collections.abc.Sequence` of `~typing.Union` \
-                 [ `~sympy.core.symbol.Symbol`,\
-                  `~sympy.matrices.expressions.MatrixSymbol` ]
-            The symbolic variables.
-        params : `~collections.abc.Sequence` of `~typing.Union` \
-                 [ `~sympy.core.symbol.Symbol`,\
-                  `~sympy.matrices.expressions.MatrixSymbol` ]
-            The symbolic parameters.
-        wrap_using : `str`, either 'lambdify' or 'autowrap'
-            Which backend to use for wrapping the objective function
-            and its derivatives for numerical evaluation.
-            See :func:`~sympy.utilities.lambdify.lambdify` and
-            :func:`~sympy.utilities.autowrap.autowrap` for more details.
-            Defaults to 'lambdify'.
-        simplify : `bool`
-            If `True`, simplify objective function and its derivatives
-             before wrapping as functions. Defaults to `True`
+        obj : `~sympy.core.expr.Expr`
+            Symbolic expression representing the objective function,
+            in terms of :py:attr:`prob.vars` and :py:attr:`prob.params`.
+        prob : `.OptimizationProblem`
+            The containing optimization problem.
+        **kwargs
+            Keyword args to pass to `.SymOptBase`.
         """
-        super().__init__(expr, vars, params, wrap_using=wrap_using,
-                         simplify=simplify)
+        self.obj = sym.sympify(obj)
+        super().__init__(prob, **kwargs)
 
-    def __str__(self):
-        return str(self._con)
+    @property
+    def expr(self):
+        return self.obj
+
+    @property
+    def sympified(self):
+        return self.obj
+
+    def __repr__(self):
+        return f"ObjectiveFunction('{self.obj}')"
