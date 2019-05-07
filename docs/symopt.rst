@@ -48,6 +48,14 @@ symopt.objective module
     :undoc-members:
     :show-inheritance:
 
+symopt.parameter module
+-----------------------
+
+.. automodule:: symopt.parameter
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 symopt.problem module
 ---------------------
 
@@ -60,6 +68,14 @@ symopt.util module
 ------------------
 
 .. automodule:: symopt.util
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+symopt.variable module
+----------------------
+
+.. automodule:: symopt.variable
     :members:
     :undoc-members:
     :show-inheritance:

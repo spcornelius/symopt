@@ -8,6 +8,11 @@ and nonlinear constraints (to say nothing of their first and second derivatives!
 optimization backends including [SciPy](https://www.scipy.org/) and 
 [Ipopt](https://projects.coin-or.org/Ipopt).
 
+Documentation
+-------------
+Auto-generated API documentation for latest stable release can be found at
+[ReadTheDocs](https://symopt.readthedocs.io/en/stable/).
+
 Usage
 -----
 Optimization problems can be defined using the `OptimizationProblem`

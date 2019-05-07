@@ -14,7 +14,7 @@
 #
 # import os
 # import sys
-# sys.path.insert(0, '/Users/sean/Dropbox/development/python/symopt/symopt')
+# sys.path.insert(0, '/home/sean/Dropbox/development/python/symopt/symopt')
 
 
 # -- Project information -----------------------------------------------------
