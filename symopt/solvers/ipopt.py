@@ -1,7 +1,8 @@
 import numpy as np
-from ipopt import problem
 from scipy.optimize import OptimizeResult
 from sympy import GreaterThan, StrictGreaterThan, LessThan, StrictLessThan
+
+import symopt.config as config
 
 __all__ = []
 __all__.extend([
@@ -14,6 +15,13 @@ INF = 10.0 ** 19
 
 def solve_ipopt(prob, x0, *args, **kwargs):
     """ Solve a given `.OptimizationProblem` using Ipopt. """
+    if config.HAS_IPOPT:
+        from ipopt import problem
+    else:
+        raise ModuleNotFoundError(
+            "Can't solve problems with the ipopt backend; optional dependency "
+            "'ipopt' was not found.")
+
     if 'print_level' not in kwargs:
         kwargs['print_level'] = 0
     kwargs['nlp_scaling_method'] = 'user-scaling'
