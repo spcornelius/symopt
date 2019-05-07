@@ -32,8 +32,8 @@ if __name__ == '__main__':
     setup(
         name=pkg_name.lower(),
         version=version,
-        description="(Non)linear optimization with symbolically-defined "
-                    "objective/constraints",
+        description="Easy (non)linear optimization in Python with "
+                    "symbolically-defined objective/constraints",
         long_description=long_description,
         long_description_content_type="text/x-rst",
         author="Sean P. Cornelius",

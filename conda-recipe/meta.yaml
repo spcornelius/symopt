@@ -6,12 +6,12 @@ package:
   version: {{ version }}
 
 source:
-  git_url: ../
+  git_url: https://github.com/spcornelius/{{ name }}
 
 build:
   noarch: python
   number: 0
-  script: python -m pip install --no-deps --ignore-installed .
+  script: python -m pip install . --no-deps -vv
 
 requirements:
   build:
@@ -31,13 +31,23 @@ test:
     - {{ name }}
   requires:
     - pytest
+    - {{ compiler('fortran') }}
 
 about:
   home: https://github.com/spcornelius/{{ name }}
   license: MIT
+  license_family: MIT
   license_file: LICENSE
-  summary: '(Non)linear optimization with symbolically-defined objectives/constraints'
-
+  doc_url: https://{{ name }}.readthedocs.io/
+  dev_url: https://github.com/spcornelius/{{ name }}
+  summary: 'Easy (non)linear optimization in Python with symbolically-defined objectives/constraints'
+  description: |
+    symopt makes it easy to define and solve (non)linear constrained optimization problems in Python.
+    It uses the power of SymPy <https://www.sympy.org/> to automate the error-prone and
+    time-consuming task of writing functions to evaluate an optimization problem's objective function and nonlinear
+    constraints (to say nothing of their first and second derivatives!). symopt then provides a standardized
+    interface to solve the problem through nonlinear optimization backends including
+    SciPy <https://www.scipy.org> and Ipopt <https://projects.coin-or.org/Ipopt>.
 extra:
   recipe-maintainers:
     - spcornelius

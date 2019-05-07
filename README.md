@@ -1,14 +1,15 @@
 symopt
 ======
-
-Easy (non)linear optimization with symbolically-defined
-objectives/constraints, with automatic calculation of derivatives.
-Uses [SciPy](https://www.scipy.org/) and [Ipopt](https://projects.coin-or.org/Ipopt) 
-(through [cyipopt](https://github.com/matthias-k/cyipopt)) as optimization backends.
+`symopt` makes it easy to define and solve (non)linear constrained optimization problems in Python. 
+It uses the power of [SymPy](https://www.sympy.org/) to automate the error-prone and 
+time-consuming task of writing functions to evaluate an optimization problem's objective function 
+and nonlinear constraints (to say nothing of their first and second derivatives!). 
+`symopt` then provides a standardized interface to solve the problem through nonlinear 
+optimization backends including [SciPy](https://www.scipy.org/) and 
+[Ipopt](https://projects.coin-or.org/Ipopt).
 
 Usage
 -----
-
 Optimization problems can be defined using the `OptimizationProblem`
 class, which has a similar constructor to `scipy.optimize.minimize`.
 For example, consider
@@ -33,11 +34,14 @@ by:
     ub = [p[0], p[1]]
 
     prob = OptimizationProblem(obj, [x1, x2], params=[p], constraints=con,
-                               lb=lb, ub=ub, mode='min')
+                               lb=lb, ub=ub, mode='min', wrap_using='lambdify')
 ```
-That's it. From here, `symopt` will automatically create the corresponding functions to
-numerically evaluate the objective, constraints, and upper/lower bounds, as well
-as those of the relevant derivatives (e.g. objective and constraint gradients). One can then solve the problem for specified parameters using `solve`:
+That's it. From here, `symopt` will automatically:
+
+* derive all necessary derivatives (gradients and Hessians for the objective function/constraints)
+* create functions to numerically evaluate these quantities (using SymPy's `lambdify` or `autowrap`)
+
+One can then solve the problem for specified parameters using `solve`:
 ```python
     x0 = [2, 2]
     p = [20.0, 50.0]
