@@ -58,7 +58,7 @@ def is_scalar(x):
     `bool`
         `True` if `x` is a scalar, `False` otherwise.
     """
-    return isinstance(sympify(x), AtomicExpr)
+    return not hasattr(sympify(x), '__getitem__')
 
 
 def negated(fun):
