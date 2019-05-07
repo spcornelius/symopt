@@ -28,12 +28,12 @@ by:
     p = MatrixSymbol('p')
 
     obj = x1**2/100 + x2**2
-    con = [x1 * x2 >= 25,
-           x1**2 + x2**2 >= 25]
+    cons = [x1 * x2 >= 25,
+            x1**2 + x2**2 >= 25]
     lb = [2, 0]
     ub = [p[0], p[1]]
 
-    prob = OptimizationProblem(obj, [x1, x2], params=[p], constraints=con,
+    prob = OptimizationProblem(obj, [x1, x2], params=[p], cons=cons,
                                lb=lb, ub=ub, mode='min', wrap_using='lambdify')
 ```
 That's it. From here, `symopt` will automatically:
