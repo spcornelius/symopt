@@ -35,12 +35,7 @@ echo "intersphinx_mapping = {'python': ('https://docs.python.org/3', None),
                              'orderedset': ('https://orderedset.readthedocs.io/en/latest/', None),
                              'sympy': ('https://docs.sympy.org/latest/', None)
                              }" >> docs/conf.py
- >> docs/conf.py
-#echo "napoleon_google_docstring = False" >>docs/conf.py
-#echo "napoleon_numpy_docstring = True" >>docs/conf.py
 
-
-ABS_REPO_PATH=$(unset CDPATH && cd "$(dirname "$0")/.." && echo $PWD)
 if [[ ! -d docs/_build/html ]]; then
     mkdir docs/_build/html
 fi
