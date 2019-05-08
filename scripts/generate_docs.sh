@@ -12,7 +12,7 @@ cat <<EOF >>docs/index.rst
 
 Overview
 ========
-.. mdinclude:: README.md
+.. mdinclude:: ../README.md
 
 EOF
 MATCH="'sphinx.ext.viewcode'"
