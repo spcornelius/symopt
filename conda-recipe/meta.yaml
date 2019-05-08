@@ -10,7 +10,7 @@ source:
   sha256: af1d64868cd56c727c3397559366617c673d5d35f6459be18df50607957605a9
 
 build:
-  skip: True  # [win]
+  noarch: python
   number: 0
   script: python -m pip install . --no-deps -vv
 
