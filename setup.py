@@ -7,7 +7,7 @@ import setuptools
 
 pkg_name = 'sympot'
 license = 'MIT'
-version = '0.1.0'
+version = '0.2.0'
 
 extras_req = {
     'testing': ['pytest', 'pytest-pep8'],
