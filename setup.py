@@ -7,7 +7,7 @@ import os
 import setuptools
 import re
 
-pkg_name = 'sympot'
+pkg_name = 'symopt'
 license = 'MIT'
 url = "https://github.com/spcornelius/symopt"
 author = "Sean P. Cornelius"
