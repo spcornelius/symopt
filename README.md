@@ -8,11 +8,12 @@ and nonlinear constraints (to say nothing of their first and second derivatives!
 optimization backends including [SciPy](https://www.scipy.org/) and 
 [Ipopt](https://projects.coin-or.org/Ipopt).
 
-Documentation
--------------
-Auto-generated API documentation for latest stable release can be found at
-https://symopt.readthedocs.io/en/stable/. For the latest development version,
-see https://symopt.readthedocs.io/en/latest/.
+Installation
+------------
+The easiest way to install `symopt` and its dependencies is through `conda`
+```bash
+conda install -c spcornelius -c conda-forge symopt
+```
 
 Usage
 -----
@@ -61,6 +62,12 @@ One can then solve the problem for specified parameters using `solve`:
     >>> print(res['fun'])
     5.000000000505797
 ```
+
+Documentation
+-------------
+Auto-generated API documentation for latest stable release can be found at
+https://symopt.readthedocs.io/en/stable/. For the latest development version,
+see https://symopt.readthedocs.io/en/latest/.
 
 Dependencies
 ------------
