@@ -12,7 +12,7 @@ Installation
 ------------
 The easiest way to install `symopt` and its dependencies is through `conda`
 ```bash
-conda install -c spcornelius -c conda-forge symopt
+conda install -c conda-forge symopt
 ```
 
 Usage
