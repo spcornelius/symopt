@@ -269,7 +269,7 @@ class OptimizationProblem(object):
         """
         return sympify(expr).free_symbols <= self.params
 
-    def solve(self, x0, *param_vals, method='cyipopt', **kwargs):
+    def solve(self, x0, *param_vals, solver='cyipopt', **kwargs):
         """ Solve optimization problem for particular parameter values.
 
         Parameters
@@ -281,7 +281,7 @@ class OptimizationProblem(object):
             with the same shapes as in :py:attr:`self.params`). Should be
             `~numbers.Real` scalars or `~sympy.matrices.matrices.MatrixBase`
             objects with `~numbers.Real` entries.
-        method : `str`
+        solver : `str`
             Which optimization backend to use. Currently supported are
             one of 'ipopt', 'slsqp' (from :mod:`scipy.optimize`), and
             'cobyla' (from :mod:`scipy.optimize`).
@@ -300,6 +300,6 @@ class OptimizationProblem(object):
                 "Can't solve OptimizationProblem without variables and an "
                 "objective function.")
         try:
-            return solve[method](self, x0, *param_vals, **kwargs)
+            return solve[solver](self, x0, *param_vals, **kwargs)
         except KeyError:
-            raise ValueError(f"Unknown optimization method '{method}'.")
+            raise ValueError(f"Unknown solver '{solver}'.")

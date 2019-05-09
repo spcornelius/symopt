@@ -13,23 +13,23 @@ wrap_using_values = ['lambdify', 'autowrap']
 
 
 def needs_ipopt(test_func):
-    def new_test_func(method, wrap_using):
-        if method == 'ipopt' and not config.HAS_IPOPT:
+    def new_test_func(solver, wrap_using):
+        if solver == 'ipopt' and not config.HAS_IPOPT:
             pytest.skip(
                 "Test requires optional dependency ipopt, which is not "
                 "installed.")
         else:
-            return test_func(method, wrap_using)
+            return test_func(solver, wrap_using)
 
     return new_test_func
 
 
-@pytest.mark.parametrize("method,wrap_using",
+@pytest.mark.parametrize("solver,wrap_using",
                          product(["ipopt", "slsqp"], wrap_using_values))
 @needs_ipopt
-def test_prob18(method, wrap_using):
+def test_prob18(solver, wrap_using):
     """ problem 18 from the Hock-Schittkowski test suite """
-    if method == "ipopt" and not config.HAS_IPOPT:
+    if solver == "ipopt" and not config.HAS_IPOPT:
         pytest.skip(
             "Test requires optional dependency ipopt, which is not installed.")
 
@@ -45,21 +45,21 @@ def test_prob18(method, wrap_using):
     prob.obj = x[0] ** 2 / 100 + x[1] ** 2
 
     x0 = [2, 2]
-    res_50 = prob.solve(x0, 50, method=method, tol=tol)
+    res_50 = prob.solve(x0, 50, solver=solver, tol=tol)
     assert res_50['success']
     assert np.allclose(res_50['x'], np.array([15.8114, 1.58114]))
 
-    res_20 = prob.solve(x0, 20, method=method, tol=tol)
+    res_20 = prob.solve(x0, 20, solver=solver, tol=tol)
     assert res_20['success']
     assert np.allclose(res_20['x'], np.array([15.8114, 1.58114]))
 
 
-@pytest.mark.parametrize("method,wrap_using",
+@pytest.mark.parametrize("solver,wrap_using",
                          product(["ipopt", "slsqp"], wrap_using_values))
 @needs_ipopt
-def test_prob71(method, wrap_using):
+def test_prob71(solver, wrap_using):
     """ problem 71 from the Hock-Schittkowski test suite """
-    if method == "ipopt" and not config.HAS_IPOPT:
+    if solver == "ipopt" and not config.HAS_IPOPT:
         pytest.skip(
             "Test requires optional dependency ipopt, which is not installed.")
 
@@ -83,8 +83,8 @@ def test_prob71(method, wrap_using):
     prob_max.obj = -obj
 
     x0 = np.array([1, 5, 5, 1])
-    res_min = prob_min.solve(x0, method=method, tol=tol)
-    res_max = prob_max.solve(x0, method=method, tol=tol)
+    res_min = prob_min.solve(x0, solver=solver, tol=tol)
+    res_max = prob_max.solve(x0, solver=solver, tol=tol)
 
     assert res_min['success']
     assert np.allclose(res_min['x'],
@@ -95,10 +95,10 @@ def test_prob71(method, wrap_using):
     assert np.allclose(np.abs(res_max['fun']), np.abs(res_min['fun']))
 
 
-@pytest.mark.parametrize("method,wrap_using",
+@pytest.mark.parametrize("solver,wrap_using",
                          product(["ipopt", "slsqp"], wrap_using_values))
 @needs_ipopt
-def test_prob64(method, wrap_using):
+def test_prob64(solver, wrap_using):
     """ problem 64 from the Hock-Schittkowski test suite """
     x1, x2, x3 = sym.symarray('x', 3)
     p = sym.MatrixSymbol('p', 6, 1)
@@ -112,20 +112,20 @@ def test_prob64(method, wrap_using):
 
     x0 = np.ones(3)
     p0 = np.array([5, 50000, 20, 72000, 10, 144000])
-    res = prob.solve(x0, p0, method=method, tol=tol)
+    res = prob.solve(x0, p0, solver=solver, tol=tol)
 
     assert res['success']
     assert np.allclose(res['x'],
                        np.array([108.7347175, 85.12613942, 204.3247078]))
 
 
-@pytest.mark.parametrize("method,wrap_using",
+@pytest.mark.parametrize("solver,wrap_using",
                          product(["ipopt", "cobyla", "slsqp"],
                                  wrap_using_values))
 @needs_ipopt
-def test_prob77(method, wrap_using):
+def test_prob77(solver, wrap_using):
     """ problem 77 from the Hock-Schittkowski test suite """
-    if method == "ipopt" and not config.HAS_IPOPT:
+    if solver == "ipopt" and not config.HAS_IPOPT:
         pytest.skip(
             "Test requires optional dependency ipopt, which is not installed.")
     x1, x2, x3, x4, x5 = sym.symarray('x', 5)
@@ -143,7 +143,7 @@ def test_prob77(method, wrap_using):
     prob.add_constraints_from(cons)
 
     x0 = 2 * np.ones(5)
-    res = prob.solve(x0, method=method, tol=tol)
+    res = prob.solve(x0, solver=solver, tol=tol)
 
     assert res['success']
     assert np.allclose(res['x'],
