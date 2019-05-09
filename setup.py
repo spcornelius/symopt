@@ -3,6 +3,7 @@
 from distutils.core import setup
 from itertools import chain
 
+import os
 import setuptools
 import re
 
@@ -11,7 +12,13 @@ license = 'MIT'
 url = "https://github.com/spcornelius/symopt"
 author = "Sean P. Cornelius"
 author_email = "spcornelius@gmail.com"
-version_file = "%s/_version.py" % (pkg_name,)
+
+
+def _path_under_setup(*args):
+    return os.path.join(os.path.dirname(__file__), *args)
+
+
+version_file = _path_under_setup(pkg_name, "_version.py")
 readme_file = "README.md"
 
 extras_req = {
