@@ -1,6 +1,7 @@
 from scipy.optimize import minimize
 from sympy import Equality
 
+from symopt.exceptions import IncompatibleSolverError
 from symopt.util import negated
 
 __all__ = []
@@ -54,10 +55,12 @@ def solve_cobyla(prob, x0, *param_vals, **kwargs):
     """ Solve an optimization problem using SciPy's COBYLA method. """
 
     if any(v.is_bounded for v in prob.vars):
-        raise ValueError("COBYLA does not support variable lb/ub. Recast as "
-                         "constraints.")
+        raise IncompatibleSolverError(
+            "COBYLA does not support explicit variable lb/ub. "
+            "Recast as constraints.")
     if any(c.type is Equality for c in prob.cons):
-        raise ValueError("COBYLA supports only inequality constraints")
+        raise IncompatibleSolverError(
+            "COBYLA supports only inequality constraints")
 
     # COBYLA doesn't use jac or bounds
     fun, _, cons, _ = prepare_scipy(prob, *param_vals)
