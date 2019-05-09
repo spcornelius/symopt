@@ -20,6 +20,7 @@ requirements:
     - setuptools
     - pip
   run:
+    - cython
     - python>=3.6
     - numpy
     - sympy
