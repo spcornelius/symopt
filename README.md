@@ -68,8 +68,10 @@ Dependencies
 * scipy
 * sympy
 * [orderedset](https://pypi.org/project/orderedset/)
-* [cyipopt](https://github.com/matthias-k/cyipopt) (Optional, for optimization using the Ipopt backend)
-* A fortran compiler (Optional, for code generation using `autowrap`)
+
+### Optional
+* [cyipopt](https://github.com/matthias-k/cyipopt) (for optimization using the Ipopt backend)
+* A fortran compiler (for code generation using `autowrap`)
 
 
 License
