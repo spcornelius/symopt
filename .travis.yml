@@ -3,17 +3,10 @@ matrix:
     - os: osx
       langauge: sh
       env: PYTHON="3.6"
-    - os: osx
-      langauge: sh
-      env: PYTHON="3.7"
     - os: linux
       dist: xenial
       language: python
       env: PYTHON="3.6"
-    - os: linux
-      dist: xenial
-      language: python
-      env: PYTHON="3.7"
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
