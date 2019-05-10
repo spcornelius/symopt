@@ -54,7 +54,7 @@ One can then solve the problem for specified parameters using `solve`:
 ```python
     >>> x = [2, 2]
     >>> p = [20.0, 50.0]
-    >>> res = prob.solve(x, p, method='ipopt')
+    >>> res = prob.solve(x, p, solver='ipopt')
     >>> print(res['success'])
     True
     >>> print(res['x'])
